@@ -9,7 +9,6 @@ export async function updateSession(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Fallback: If Supabase environment variables are missing on Vercel, allow route navigation without crashing
   if (!supabaseUrl || !supabaseAnonKey) {
     return supabaseResponse;
   }
@@ -39,21 +38,9 @@ export async function updateSession(request: NextRequest) {
     );
 
     // Refresh auth token safely
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    await supabase.auth.getUser();
 
-    // Redirect unauthenticated users to /login if auth is active
-    if (
-      !user &&
-      !request.nextUrl.pathname.startsWith("/login") &&
-      !request.nextUrl.pathname.startsWith("/auth") &&
-      !request.nextUrl.pathname.startsWith("/api")
-    ) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      return NextResponse.redirect(url);
-    }
+    // For Hackathon Demo: Allow public access to dashboard routes so Vercel reviewers can inspect the live app instantly
   } catch (error) {
     console.error("Supabase Middleware Auth Check Warning:", error);
   }
