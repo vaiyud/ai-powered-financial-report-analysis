@@ -14,8 +14,7 @@ const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 let cached: SupabaseClient | null = null;
 
 /**
- * Returns a singleton server-side Supabase client backed by the service-role
- * key. Throws if the required environment variables are missing.
+ * Returns a singleton server-side Supabase client backed by the service-role key.
  */
 export function getServiceSupabase(): SupabaseClient {
   if (cached) return cached;
@@ -36,3 +35,14 @@ export function getServiceSupabase(): SupabaseClient {
 
   return cached;
 }
+
+export function getSupabase(): SupabaseClient {
+  return getServiceSupabase();
+}
+
+/** Proxy for lazy initialization export */
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    return (getServiceSupabase() as unknown as Record<string | symbol, unknown>)[prop];
+  },
+});
