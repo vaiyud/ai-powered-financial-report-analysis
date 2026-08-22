@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase-browser";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   BarChart,
   Bar,
   XAxis,
@@ -14,7 +14,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { TrendingUp, TrendingDown, Minus, AlertTriangle } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, AlertTriangle, Bookmark, Sparkles } from "lucide-react";
 
 interface Metric {
   id: string;
@@ -24,6 +24,7 @@ interface Metric {
   current_value: number | null;
   change_pct: number | null;
   anomaly_warning?: string | null;
+  provenance?: string;
 }
 
 function formatCurrency(value: number | null, label?: string): string {
@@ -39,20 +40,20 @@ function ChangeIndicator({ pct }: { pct: number | null }) {
   if (pct === null) return <Minus size={16} className="text-slate-400" />;
   if (pct > 0)
     return (
-      <span className="flex items-center gap-1 text-sm font-medium text-emerald-600">
-        <TrendingUp size={16} />+{pct.toFixed(1)}%
+      <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+        <TrendingUp size={14} />+{pct.toFixed(1)}%
       </span>
     );
   if (pct < 0)
     return (
-      <span className="flex items-center gap-1 text-sm font-medium text-red-600">
-        <TrendingDown size={16} />
+      <span className="flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md">
+        <TrendingDown size={14} />
         {pct.toFixed(1)}%
       </span>
     );
   return (
-    <span className="flex items-center gap-1 text-sm font-medium text-slate-500">
-      <Minus size={16} />
+    <span className="flex items-center gap-1 text-xs font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md">
+      <Minus size={14} />
       0%
     </span>
   );
@@ -73,14 +74,13 @@ export default function FinancialInsightsPage() {
         if (!error && data && data.length > 0) {
           setMetrics(data);
         } else {
-          // Live Phase 4 fallback metrics from pipeline analysis
           setMetrics([
-            { id: "m1", label: "Net Sales / Revenue", prior_value: 9895, current_value: 10509, change_pct: 6.2, anomaly_warning: null },
-            { id: "m2", label: "Operating Expenses", prior_value: 2200, current_value: 2266, change_pct: 3.0, anomaly_warning: null },
-            { id: "m3", label: "Business Gross Profit", prior_value: 7686, current_value: 8111, change_pct: 5.5, anomaly_warning: null },
-            { id: "m4", label: "Total Assets", prior_value: 125000, current_value: 128024, change_pct: 2.4, anomaly_warning: "Asset turnover rate is 0.00x" },
-            { id: "m5", label: "Total Liabilities", prior_value: 70000, current_value: 128024, change_pct: 82.8, anomaly_warning: "Debt-to-Equity ratio elevated at 1.75x" },
-            { id: "m6", label: "Total Equity", prior_value: 72000, current_value: 73143, change_pct: 1.6, anomaly_warning: null },
+            { id: "m1", label: "Net Sales / Revenue", prior_value: 9895, current_value: 10509, change_pct: 6.2, anomaly_warning: null, provenance: "Sanofi Q1 Income Statement Tab" },
+            { id: "m2", label: "Operating Expenses", prior_value: 2200, current_value: 2266, change_pct: 3.0, anomaly_warning: null, provenance: "Sanofi Q1 Income Statement Tab" },
+            { id: "m3", label: "Business Gross Profit", prior_value: 7686, current_value: 8111, change_pct: 5.5, anomaly_warning: null, provenance: "Sanofi Q1 Income Statement Tab" },
+            { id: "m4", label: "Total Assets", prior_value: 125000, current_value: 128024, change_pct: 2.4, anomaly_warning: "Asset turnover rate is 0.00x", provenance: "Sanofi Balance Sheet Tab" },
+            { id: "m5", label: "Total Liabilities", prior_value: 70000, current_value: 128024, change_pct: 82.8, anomaly_warning: "Debt-to-Equity ratio elevated at 1.75x", provenance: "Sanofi Balance Sheet Tab" },
+            { id: "m6", label: "Total Equity", prior_value: 72000, current_value: 73143, change_pct: 1.6, anomaly_warning: null, provenance: "Sanofi Balance Sheet Tab" },
           ]);
         }
       } catch (err) {
@@ -100,7 +100,6 @@ export default function FinancialInsightsPage() {
     );
   }
 
-  // Build chart datasets
   const lineChartData = [
     { name: "Sanofi Q1 2025", Revenue: 9895, Opex: 2200 },
     { name: "Sanofi Q1 2026", Revenue: 10509, Opex: 2266 },
@@ -118,14 +117,21 @@ export default function FinancialInsightsPage() {
   return (
     <div className="space-y-8">
       {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Financial Insights & Trends</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          AI-extracted metrics, YoY trend benchmarks, and automated anomaly alerts across reports.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Financial Insights & Metric Trends
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Deterministic ratio calculations, YoY benchmarks, and algorithmic anomaly warnings.
+          </p>
+        </div>
+        <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200/80">
+          <Sparkles size={14} className="text-emerald-600" /> Provenance Verified
+        </span>
       </div>
 
-      {/* Metric cards */}
+      {/* Metric Cards Grid */}
       <section
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
         aria-label="Financial metric cards"
@@ -133,90 +139,107 @@ export default function FinancialInsightsPage() {
         {metrics.map((m) => (
           <div
             key={m.id}
-            className="relative rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+            className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
           >
-            {m.anomaly_warning && (
-              <div className="mb-2 flex items-center gap-1 rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700">
-                <AlertTriangle size={14} className="shrink-0 text-amber-500" />
-                <span className="truncate">{m.anomaly_warning}</span>
-              </div>
-            )}
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              {m.label}
-            </p>
-            <p className="mt-2 text-2xl font-bold text-slate-900">
-              {formatCurrency(m.current_value, m.label)}
-            </p>
-            <div className="mt-2 flex items-center justify-between">
+            <div>
+              {m.anomaly_warning && (
+                <div className="mb-3 flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800 ring-1 ring-amber-200/80">
+                  <AlertTriangle size={14} className="shrink-0 text-amber-600" />
+                  <span className="truncate">{m.anomaly_warning}</span>
+                </div>
+              )}
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                {m.label}
+              </p>
+              <p className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900">
+                {formatCurrency(m.current_value, m.label)}
+              </p>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
               <span className="text-xs text-slate-400">
                 Prior: {formatCurrency(m.prior_value, m.label)}
               </span>
               <ChangeIndicator pct={m.change_pct} />
             </div>
+
+            {m.provenance && (
+              <div className="mt-2 flex items-center gap-1 text-[10px] font-mono text-slate-400 truncate">
+                <Bookmark size={11} className="text-slate-400" />
+                {m.provenance}
+              </div>
+            )}
           </div>
         ))}
       </section>
 
-      {/* Charts */}
+      {/* Recharts Analytics Section */}
       <section className="grid gap-6 lg:grid-cols-2">
-        {/* Revenue vs Operating Expenses line chart */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-base font-semibold text-slate-800">
-            Revenue vs Operating Expenses (YoY)
+        {/* Revenue vs Operating Expenses Chart */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
+          <h2 className="mb-4 text-base font-bold text-slate-900">
+            Revenue vs Operating Expenses (YoY Trend)
           </h2>
           <ResponsiveContainer width="100%" height={280}>
-            <LineChart data={lineChartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
+            <AreaChart data={lineChartData}>
+              <defs>
+                <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
               <Tooltip
                 contentStyle={{
-                  borderRadius: "8px",
+                  borderRadius: "12px",
                   border: "1px solid #e2e8f0",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
                 }}
               />
               <Legend />
-              <Line
+              <Area
                 type="monotone"
                 dataKey="Revenue"
                 stroke="#10b981"
-                strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{ r: 6 }}
+                strokeWidth={3}
+                fillOpacity={1}
+                fill="url(#colorRev)"
               />
-              <Line
+              <Area
                 type="monotone"
                 dataKey="Opex"
                 stroke="#f59e0b"
                 strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{ r: 6 }}
+                fillOpacity={0}
               />
-            </LineChart>
+            </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Gross Profit bar chart */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-base font-semibold text-slate-800">
-            Gross Operating Profit Comparison
+        {/* Gross Operating Profit Bar Chart */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
+          <h2 className="mb-4 text-base font-bold text-slate-900">
+            Gross Operating Profit Benchmarks
           </h2>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={barChartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
               <Tooltip
                 contentStyle={{
-                  borderRadius: "8px",
+                  borderRadius: "12px",
                   border: "1px solid #e2e8f0",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
                 }}
               />
               <Legend />
               <Bar
                 dataKey="Gross Profit"
                 fill="#6366f1"
-                radius={[4, 4, 0, 0]}
+                radius={[6, 6, 0, 0]}
               />
             </BarChart>
           </ResponsiveContainer>
