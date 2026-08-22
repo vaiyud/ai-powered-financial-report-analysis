@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   TrendingUp,
@@ -10,7 +10,9 @@ import {
   Lock,
   Settings,
   ShieldCheck,
+  LogOut,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -23,6 +25,14 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
     <aside className="fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-slate-900 text-slate-200 border-r border-slate-800/80 shadow-xl">
@@ -78,8 +88,8 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Footer & Compliance Badge */}
-      <div className="border-t border-slate-800/80 p-4">
+      {/* Footer & Compliance Badge + Logout */}
+      <div className="border-t border-slate-800/80 p-4 space-y-3">
         <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-3.5">
           <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
             <Lock size={14} />
@@ -89,7 +99,17 @@ export default function Sidebar() {
             Zero PII Exposure Engine
           </p>
         </div>
-        <p className="mt-3 text-center text-[11px] text-slate-600">&copy; 2026 SmartFlow One Platform</p>
+
+        <button
+          onClick={handleLogout}
+          type="button"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-800/60 py-2.5 text-xs font-semibold text-slate-300 transition-colors hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30"
+        >
+          <LogOut size={15} />
+          Sign Out of Account
+        </button>
+
+        <p className="text-center text-[11px] text-slate-600">&copy; 2026 SmartFlow One Platform</p>
       </div>
     </aside>
   );
