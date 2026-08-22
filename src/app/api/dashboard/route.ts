@@ -27,7 +27,7 @@ export async function GET() {
       { label: "Risks & Anomalies Scored", value: totalRisks, icon: "AlertTriangle" },
     ],
     summary: {
-      title: "FinSight AI Executive Summary",
+      title: "SmartFlow One Executive Summary",
       description:
         "Multi-source analysis across Sanofi S.A., Bursa Malaysia Berhad, Maybank, and Hong Leong Islamic Bank:",
       metrics: [
