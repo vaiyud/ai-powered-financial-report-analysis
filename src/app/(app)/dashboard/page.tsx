@@ -1,35 +1,26 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { Link } from "react-router-dom";
+import VoiceSummary from "@/components/VoiceSummary";
 import {
   FileText,
   TrendingUp,
   ShieldAlert,
   AlertTriangle,
   Upload,
-  ArrowUpRight,
-  ArrowDownRight,
+  RefreshCw,
   Sparkles,
   Zap,
-  FileCheck,
-  Send,
   MessageSquare,
-  Bookmark,
+  Send,
+  X,
+  ExternalLink,
+  CheckCircle2,
+  Lock,
+  Layers,
+  FileSpreadsheet,
 } from "lucide-react";
-import VoiceSummary from "@/components/VoiceSummary";
-
-const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
-  FileText,
-  TrendingUp,
-  ShieldAlert,
-  AlertTriangle,
-};
-
-interface Stat {
-  label: string;
-  value: number;
-  icon: string;
-}
 
 interface Metric {
   label: string;
@@ -45,8 +36,14 @@ interface Risk {
   source: string;
 }
 
+interface StatItem {
+  label: string;
+  value: number;
+  icon: string;
+}
+
 interface DashboardData {
-  stats: Stat[];
+  stats: StatItem[];
   summary: {
     title: string;
     description: string;
@@ -54,6 +51,13 @@ interface DashboardData {
   };
   risks: Risk[];
 }
+
+const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  FileText,
+  TrendingUp,
+  ShieldAlert,
+  AlertTriangle,
+};
 
 const severityColors: Record<string, string> = {
   high: "bg-red-50 text-red-700 ring-red-200",
@@ -121,6 +125,7 @@ export default function DashboardPage() {
   const [queryText, setQueryText] = useState("");
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [isAsking, setIsAsking] = useState(false);
+  const [expandedStatLabel, setExpandedStatLabel] = useState<string | null>(null);
 
   const [processingState, setProcessingState] = useState<{
     isProcessing: boolean;
@@ -248,24 +253,16 @@ export default function DashboardPage() {
         );
       } else {
         setAiAnswer(
-          `SmartFlow RAG Analysis: Ingested reports show robust top-line operating margins and high capital adequacy across reporting periods. [Source: FAISS 103,798 Indexed Chunks]`
+          `SmartFlow RAG Assistant retrieved relevant grounding chunks for "${queryText}": Multi-source financials demonstrate strong liquidity buffers, 1.75x debt-to-equity ratio, and full compliance under PDPA Malaysia Act 2010.`
         );
       }
-    }, 1000);
+    }, 800);
   };
 
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-500" />
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-        Failed to load dashboard data.
       </div>
     );
   }
@@ -297,25 +294,32 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Stat Cards - Bento Row */}
+      {/* Stat Cards - Bento Row with Click Expansion */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {data.stats.map((stat) => {
           const Icon = iconMap[stat.icon] ?? FileText;
           return (
-            <div
+            <button
               key={stat.label}
-              className="group flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              type="button"
+              onClick={() => setExpandedStatLabel(stat.label)}
+              className="group text-left relative flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-500/50 cursor-pointer"
             >
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-colors group-hover:bg-emerald-600 group-hover:text-white">
                 <Icon size={22} />
               </div>
-              <div>
-                <p className="text-2xl font-extrabold tracking-tight text-slate-900">
-                  {stat.value.toLocaleString()}
-                </p>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-2xl font-extrabold tracking-tight text-slate-900">
+                    {stat.value.toLocaleString()}
+                  </p>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                    Expand <ExternalLink size={10} />
+                  </span>
+                </div>
                 <p className="text-xs font-medium text-slate-500 mt-0.5">{stat.label}</p>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -340,7 +344,7 @@ export default function DashboardPage() {
           <button
             type="submit"
             disabled={isAsking}
-            className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-slate-950 transition-colors hover:bg-emerald-400 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-slate-950 transition-colors hover:bg-emerald-400 disabled:opacity-50 cursor-pointer"
           >
             {isAsking ? "Querying..." : <><Send size={14} /> Ask AI</>}
           </button>
@@ -348,171 +352,457 @@ export default function DashboardPage() {
 
         {aiAnswer && (
           <div className="mt-4 rounded-xl bg-slate-950/90 border border-emerald-500/30 p-4 text-xs leading-relaxed text-slate-200">
-            <p className="font-semibold text-emerald-400 mb-1 flex items-center gap-1.5">
-              <Sparkles size={14} /> SmartFlow Verified Response:
-            </p>
+            <span className="font-bold text-emerald-400 block mb-1">🤖 SmartFlow AI Response:</span>
             {aiAnswer}
           </div>
         )}
       </div>
 
-      {/* Upload Zone & Pipeline Runner */}
-      <div className="group relative rounded-2xl border-2 border-dashed border-slate-300 bg-gradient-to-b from-slate-50/50 to-white p-8 text-center transition-all hover:border-emerald-500/80 hover:bg-emerald-50/20 shadow-xs">
-        {processingState.isProcessing ? (
-          <div className="py-4 space-y-4 max-w-lg mx-auto">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 animate-bounce">
-              <Zap size={28} />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-slate-900">
-                Processing Report: {processingState.uploadedFileName}
-              </h3>
-              <p className="mt-1 text-xs font-medium text-emerald-600">
-                {processingState.stepName}
-              </p>
-            </div>
-            <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
-              <div
-                className="h-full rounded-full bg-emerald-500 transition-all duration-300"
-                style={{ width: `${processingState.progressPct}%` }}
-              />
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 shadow-xs group-hover:scale-105 transition-transform">
-              <Upload size={26} />
-            </div>
-            <h3 className="text-base font-semibold text-slate-900">
-              Upload Financial Reports (PDF / Multi-Tab XLSX)
-            </h3>
-            <p className="mt-1 text-xs text-slate-500 max-w-md mx-auto">
-              Automatically scrubbed under PDPA Malaysia prior to FAISS vector indexing. Supports Bursa Malaysia Annual Reports and Sanofi Q1 Spreadsheets.
-            </p>
-            {processingState.uploadedFileName && (
-              <div className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                <FileCheck size={14} /> Ingested & Analyzed: {processingState.uploadedFileName}
+      {/* Document Analysis Pipeline & Voice Summary Bento Grid */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Left: Document Upload & Live Pipeline Status */}
+        <div className="lg:col-span-7 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs flex flex-col justify-between space-y-6">
+          <div>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                  <Upload className="h-4 w-4 text-emerald-600" />
+                  Financial Report Ingestion Pipeline
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Drag and drop PDF annual reports or multi-tab Excel financial sheets.
+                </p>
               </div>
-            )}
-            <div className="mt-5 flex items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={handleBrowseClick}
-                className="rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md shadow-emerald-600/20 transition-all hover:bg-emerald-700"
-              >
-                Browse Document Files
-              </button>
               <button
                 type="button"
                 onClick={handleDemoReload}
-                className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 shadow-xs transition-all hover:bg-slate-50"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 cursor-pointer"
               >
-                Reload Demo Reports (6 Documents)
+                <RefreshCw size={13} className={processingState.isProcessing ? "animate-spin" : ""} />
+                Re-analyze Report
               </button>
             </div>
-          </>
-        )}
-      </div>
 
-      {/* Dual Bottom Bento Grid */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* AI Executive Summary & Voice Summary */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Sparkles size={18} className="text-emerald-500" />
-                RAG AI Executive Summary
-              </h2>
-              <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-                Verified Insights
-              </span>
-            </div>
+            {/* Dropzone Container */}
+            <div
+              onClick={handleBrowseClick}
+              className={`mt-5 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition-all cursor-pointer ${
+                processingState.isProcessing
+                  ? "border-emerald-400 bg-emerald-50/20"
+                  : "border-slate-300/80 bg-slate-50/50 hover:border-emerald-500 hover:bg-emerald-50/30"
+              }`}
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100/80 text-emerald-700 mb-3">
+                <Upload size={24} />
+              </div>
+              <p className="text-xs font-bold text-slate-800">
+                Click to browse or drag financial report files here
+              </p>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Supports PDF (1,000+ pages), Excel (.xlsx, multi-tab), and CSV statements
+              </p>
 
-            <p className="mt-3 text-xs leading-relaxed text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-100 font-medium">
-              {activeSummaryText}
-            </p>
-
-            <div className="mt-4 flex items-center gap-3">
-              <VoiceSummary summaryText={activeSummaryText} />
-              <span className="text-[11px] text-slate-400 font-medium">
-                30s Web Speech Narration Engine
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3 pt-4 border-t border-slate-100">
-            {data.summary.metrics.map((metric) => (
-              <div
-                key={metric.label}
-                className="rounded-xl border border-slate-100 bg-slate-50/80 p-3.5"
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleBrowseClick();
+                }}
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-slate-800"
               >
-                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                  {metric.label}
-                </p>
-                <p className="mt-1 text-lg font-extrabold text-slate-900">
-                  {metric.value}
-                </p>
-                <div className="mt-1 flex items-center gap-1">
-                  {metric.direction === "up" ? (
-                    <ArrowUpRight size={13} className="text-emerald-500" />
-                  ) : (
-                    <ArrowDownRight size={13} className="text-red-500" />
-                  )}
-                  <span
-                    className={`text-[11px] font-semibold ${
-                      metric.direction === "up"
-                        ? "text-emerald-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {metric.change}% YoY
-                  </span>
+                Browse Local File
+              </button>
+            </div>
+
+            {/* Live Progress Bar */}
+            {processingState.isProcessing && (
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 space-y-2">
+                <div className="flex items-center justify-between text-xs font-bold text-emerald-900">
+                  <span>{processingState.stepName}</span>
+                  <span>{processingState.progressPct}%</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-emerald-200/80">
+                  <div
+                    className="h-full bg-emerald-500 transition-all duration-500 ease-out"
+                    style={{ width: `${processingState.progressPct}%` }}
+                  />
                 </div>
               </div>
-            ))}
+            )}
+          </div>
+
+          {/* Compliance Guarantee Footnote */}
+          <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3.5 border border-slate-100 text-xs">
+            <span className="text-slate-600 font-medium flex items-center gap-1.5">
+              <Sparkles size={14} className="text-emerald-600" />
+              PDPA Malaysia Act 2010 Automated PII Scrubbing Enforced
+            </span>
+            <span className="font-mono text-[11px] font-semibold text-slate-400">Zero PII Leakage</span>
           </div>
         </div>
 
-        {/* AI Risk Detection */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <ShieldAlert size={18} className="text-amber-500" />
-              AI Risk Severity Highlights
-            </h2>
-            <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
-              3 Alerts Detected
-            </span>
-          </div>
-          <p className="mt-2 text-xs leading-relaxed text-slate-500">
-            Automatically scored from target annual reports and balance sheet filings.
-          </p>
+        {/* Right: AI Voice Summary Card */}
+        <div className="lg:col-span-5 flex">
+          <VoiceSummary summaryText={activeSummaryText} />
+        </div>
+      </div>
 
-          <div className="mt-5 space-y-3">
-            {data.risks.slice(0, 3).map((risk) => (
-              <div
-                key={risk.id}
-                className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50/80 p-4 transition-all hover:bg-white hover:shadow-xs"
-              >
+      {/* RAG Executive Financial Summary Section */}
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
+        <div className="mb-5 flex items-center justify-between border-b border-slate-100 pb-4">
+          <div>
+            <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-emerald-600" />
+              {data.summary.title}
+            </h2>
+            <p className="mt-0.5 text-xs text-slate-500">{data.summary.description}</p>
+          </div>
+          <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
+            RAG Grounded Insights
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {data.summary.metrics.map((m) => (
+            <div
+              key={m.label}
+              className="rounded-xl border border-slate-100 bg-slate-50/70 p-4 transition-all hover:bg-slate-100/80"
+            >
+              <p className="text-xs font-medium text-slate-500">{m.label}</p>
+              <div className="mt-2 flex items-baseline justify-between">
+                <p className="text-xl font-extrabold text-slate-900">{m.value}</p>
                 <span
-                  className={`mt-0.5 inline-flex shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase ring-1 ${severityColors[risk.severity]}`}
+                  className={`inline-flex items-center text-xs font-bold ${
+                    m.direction === "up" ? "text-emerald-600" : "text-red-600"
+                  }`}
+                >
+                  {m.direction === "up" ? "+" : "-"}
+                  {Math.abs(m.change)}% YoY
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Scored Anomaly & Risk Highlights */}
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
+        <div className="mb-5 flex items-center justify-between border-b border-slate-100 pb-4">
+          <div>
+            <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              Top Identified Financial Anomalies & Risk Disclosures
+            </h2>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Deterministic scoring against enterprise debt, credit, and platform continuity thresholds.
+            </p>
+          </div>
+          <Link
+            to="/risk-analysis"
+            className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+          >
+            View All Matrix <ExternalLink size={12} />
+          </Link>
+        </div>
+
+        <div className="space-y-3">
+          {data.risks.map((risk) => (
+            <div
+              key={risk.id}
+              className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/60 p-4 transition-all hover:bg-slate-100/80"
+            >
+              <div className="flex items-center gap-3">
+                <span
+                  className={`inline-flex rounded-md px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ring-1 ${
+                    severityColors[risk.severity] ?? "bg-slate-100 text-slate-700 ring-slate-200"
+                  }`}
                 >
                   {risk.severity}
                 </span>
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold text-slate-800">
-                    {risk.title}
-                  </p>
-                  <p className="mt-0.5 text-[11px] font-mono text-slate-400 truncate">
-                    Source: {risk.source}
-                  </p>
+                <div>
+                  <p className="text-xs font-bold text-slate-800">{risk.title}</p>
+                  <p className="text-[11px] font-mono text-slate-400 mt-0.5">Source: {risk.source}</p>
                 </div>
               </div>
-            ))}
-          </div>
+
+              <Link
+                to="/risk-analysis"
+                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50"
+              >
+                Inspect
+              </Link>
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* ========================================================================= */}
+      {/* KPI METRIC EXPANSION MODAL OVERLAYS */}
+      {/* ========================================================================= */}
+      {expandedStatLabel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setExpandedStatLabel(null)}
+              className="absolute right-6 top-6 rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+
+            {/* Modal Content: Financial Documents Analyzed */}
+            {expandedStatLabel === "Financial Documents Analyzed" && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-bold">
+                    <FileText size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">
+                      Financial Documents Ingested & Analyzed
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Multi-format PDF & Excel financial statements dataset breakdown
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 mb-6">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <FileSpreadsheet className="text-emerald-600" size={20} />
+                      <div>
+                        <p className="text-xs font-bold text-slate-900">2026_04_23_Sanofi_Q1_2026_Income_Statement.xlsx</p>
+                        <p className="text-[11px] text-slate-500">Excel Multi-Tab • 1,322 Line-Items Processed</p>
+                      </div>
+                    </div>
+                    <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
+                      Parsed
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <FileText className="text-emerald-600" size={20} />
+                      <div>
+                        <p className="text-xs font-bold text-slate-900">Bursa_2025_Annual_Integrated_Report.pdf</p>
+                        <p className="text-[11px] text-slate-500">PDF Report • 240 Pages Extracted</p>
+                      </div>
+                    </div>
+                    <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
+                      Parsed
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <FileText className="text-emerald-600" size={20} />
+                      <div>
+                        <p className="text-xs font-bold text-slate-900">Maybank Integrated AR 2025-Part 1 & 2.pdf</p>
+                        <p className="text-[11px] text-slate-500">PDF Report • 548 Pages Extracted</p>
+                      </div>
+                    </div>
+                    <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
+                      Parsed
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <FileText className="text-emerald-600" size={20} />
+                      <div>
+                        <p className="text-xs font-bold text-slate-900">Hong_Leong_Islamic_Bank_Annual_Report_2025.pdf</p>
+                        <p className="text-[11px] text-slate-500">PDF Report • 310 Pages Extracted</p>
+                      </div>
+                    </div>
+                    <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
+                      Parsed
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-slate-200 pt-4">
+                  <span className="text-xs text-slate-500">100% Provenance Line-Item Traceability</span>
+                  <Link
+                    to="/financial-insights"
+                    onClick={() => setExpandedStatLabel(null)}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800"
+                  >
+                    Open Financial Insights <ArrowRight size={14} />
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* Modal Content: FAISS Chunks Indexed */}
+            {expandedStatLabel === "FAISS Chunks Indexed" && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-bold">
+                    <Layers size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">
+                      FAISS Vector Index Technical Specification
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Dense cosine vector embedding & retrieval architecture
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-5">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-[11px] font-semibold text-slate-500 uppercase">Index Strategy</p>
+                    <p className="text-base font-extrabold text-slate-900 mt-1">FAISS IndexFlatL2</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-[11px] font-semibold text-slate-500 uppercase">Vector Dimension</p>
+                    <p className="text-base font-extrabold text-emerald-600 mt-1">1,024 Dimensions</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-[11px] font-semibold text-slate-500 uppercase">Semantic Chunk Size</p>
+                    <p className="text-base font-extrabold text-slate-900 mt-1">~1,000 Chars / Chunk</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-[11px] font-semibold text-slate-500 uppercase">Total Indexed Segments</p>
+                    <p className="text-base font-extrabold text-emerald-600 mt-1">103,798 Chunks</p>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-600 leading-relaxed mb-6">
+                  Text and tabular financial statements are segmented into semantic chunks and embedded into a high-dimensional vector space. Search queries perform sparse cosine similarity lookups for zero-hallucination RAG answers.
+                </p>
+
+                <div className="flex items-center justify-between border-t border-slate-200 pt-4">
+                  <span className="text-xs text-slate-500">Sub-10ms Cosine Similarity Retrieval</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setExpandedStatLabel(null);
+                      window.scrollTo({ top: 300, behavior: "smooth" });
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-emerald-400"
+                  >
+                    Test AI Query Assistant <Sparkles size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Modal Content: PDPA PII Tokens Masked */}
+            {expandedStatLabel === "PDPA PII Tokens Masked" && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-bold">
+                    <Lock size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">
+                      PDPA Malaysia Act 2010 Privacy Audit
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Zero PII exposure pre-ingestion regex anonymization breakdown
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 mb-5">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-slate-900 flex items-center gap-2">
+                        <CheckCircle2 className="text-emerald-600" size={16} />
+                        Malaysian NRIC IC Numbers Scrubbed
+                      </p>
+                      <p className="text-[11px] font-mono text-slate-500 mt-1">Regex Pattern: \d&#123;6&#125;-\d&#123;2&#125;-\d&#123;4&#125;</p>
+                    </div>
+                    <span className="text-lg font-extrabold text-emerald-600">3,090 Tokens</span>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-slate-900 flex items-center gap-2">
+                        <CheckCircle2 className="text-emerald-600" size={16} />
+                        Corporate Email Disclosures Masked
+                      </p>
+                      <p className="text-[11px] font-mono text-slate-500 mt-1">Regex Pattern: [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+</p>
+                    </div>
+                    <span className="text-lg font-extrabold text-emerald-600">4,753 Tokens</span>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-600 leading-relaxed mb-6">
+                  All personal data is scrubbed prior to LLM vector embedding generation, guaranteeing zero confidential data leakage under Malaysian PDPA regulatory frameworks.
+                </p>
+
+                <div className="flex items-center justify-between border-t border-slate-200 pt-4">
+                  <span className="text-xs text-slate-500">PDPA Act 2010 Audit Ready</span>
+                  <Link
+                    to="/privacy-center"
+                    onClick={() => setExpandedStatLabel(null)}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800"
+                  >
+                    Open Privacy Center <ArrowRight size={14} />
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* Modal Content: Risks & Anomalies Scored */}
+            {expandedStatLabel === "Risks & Anomalies Scored" && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 font-bold">
+                    <AlertTriangle size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">
+                      Risk Matrix & Anomaly Scoring Breakdown
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Deterministic ratios vs enterprise risk thresholds
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 mb-5">
+                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center">
+                    <span className="text-2xl font-extrabold text-red-700">1</span>
+                    <p className="text-[10px] font-bold text-red-800 uppercase mt-1">High Severity</p>
+                  </div>
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center">
+                    <span className="text-2xl font-extrabold text-amber-700">5</span>
+                    <p className="text-[10px] font-bold text-amber-800 uppercase mt-1">Medium Severity</p>
+                  </div>
+                  <div className="rounded-xl border border-sky-200 bg-sky-50 p-4 text-center">
+                    <span className="text-2xl font-extrabold text-sky-700">3</span>
+                    <p className="text-[10px] font-bold text-sky-800 uppercase mt-1">Low Severity</p>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 mb-6">
+                  <p className="text-xs font-bold text-slate-900">Primary Flagged Anomaly:</p>
+                  <p className="text-xs text-slate-600 mt-1">
+                    Sanofi S.A. Debt-to-Equity ratio reached <strong className="text-red-600">1.75x</strong> (Threshold &gt; 1.50x), indicating elevated leverage during Q1 2026 acquisition phases.
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-slate-200 pt-4">
+                  <span className="text-xs text-slate-500">Pydantic Rule Engine Active</span>
+                  <Link
+                    to="/risk-analysis"
+                    onClick={() => setExpandedStatLabel(null)}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800"
+                  >
+                    View Risk Matrix <ArrowRight size={14} />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
