@@ -1,7 +1,4 @@
-"use client";
-
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   TrendingUp,
@@ -12,7 +9,7 @@ import {
   ShieldCheck,
   LogOut,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { supabase } from "@/lib/supabase";
 
 const navItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -24,14 +21,12 @@ const navItems = [
 ];
 
 export default function Sidebar() {
-  const pathname = usePathname();
-  const router = useRouter();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   async function handleLogout() {
-    const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
+    navigate("/login");
   }
 
   return (
@@ -60,13 +55,13 @@ export default function Sidebar() {
         {navItems.map(({ label, href, icon: Icon }) => {
           const isActive =
             href === "/"
-              ? pathname === "/"
-              : pathname.startsWith(href);
+              ? location.pathname === "/" || location.pathname === "/dashboard"
+              : location.pathname.startsWith(href);
 
           return (
             <Link
               key={href}
-              href={href}
+              to={href}
               className={`group relative flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium transition-all duration-150 ${
                 isActive
                   ? "bg-emerald-500/10 text-emerald-400 font-semibold ring-1 ring-emerald-500/20 shadow-xs"
@@ -103,7 +98,7 @@ export default function Sidebar() {
         <button
           onClick={handleLogout}
           type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-800/60 py-2.5 text-xs font-semibold text-slate-300 transition-colors hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-800/60 py-2.5 text-xs font-semibold text-slate-300 transition-colors hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30 cursor-pointer"
         >
           <LogOut size={15} />
           Sign Out of Account

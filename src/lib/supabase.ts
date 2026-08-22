@@ -1,48 +1,11 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 
-/**
- * Server-side Supabase client.
- *
- * Uses the service-role key, so this module must only ever be imported from
- * server code (API routes, server actions, server-only helpers). Never import
- * it into client components — the service-role key bypasses row-level security.
- */
+const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL ||
+  "https://niealkjjqlcyutnjuvkf.supabase.co";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseAnonKey =
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pZWFsa2pqcWxjeXV0bmp1dmtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyOTczNTAsImV4cCI6MjEwMjg3MzM1MH0.tcvZ7CKZqan9miRHvcsvV1WIZlfrFYCM2xmBHQg-Log";
 
-let cached: SupabaseClient | null = null;
-
-/**
- * Returns a singleton server-side Supabase client backed by the service-role key.
- */
-export function getServiceSupabase(): SupabaseClient {
-  if (cached) return cached;
-
-  if (!supabaseUrl) {
-    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL environment variable.");
-  }
-  if (!serviceRoleKey) {
-    throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY environment variable.");
-  }
-
-  cached = createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
-
-  return cached;
-}
-
-export function getSupabase(): SupabaseClient {
-  return getServiceSupabase();
-}
-
-/** Proxy for lazy initialization export */
-export const supabase = new Proxy({} as SupabaseClient, {
-  get(_target, prop) {
-    return (getServiceSupabase() as unknown as Record<string | symbol, unknown>)[prop];
-  },
-});
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
