@@ -1,4 +1,5 @@
 {
+  "name": "ai-powered-financial-report-analysi",
   "framework": "nextjs",
   "buildCommand": "next build",
   "installCommand": "npm install"

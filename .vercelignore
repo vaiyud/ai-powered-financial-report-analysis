@@ -1,0 +1,8 @@
+node_modules
+.next
+.git
+faiss_index
+*.pdf
+*.xlsx
+src/pipeline/__pycache__
+src/pipeline/*.json
