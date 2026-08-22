@@ -44,5 +44,8 @@ next-env.d.ts
 *.pdf
 *.xlsx
 src/pipeline/extracted_data.json
+src/pipeline/scrubbed_data.json
+src/pipeline/pdpa_audit_report.json
 faiss_index/
+
 
