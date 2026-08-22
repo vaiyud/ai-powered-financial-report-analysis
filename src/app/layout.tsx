@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Sidebar from "@/components/Sidebar";
-import TopBar from "@/components/TopBar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,23 +17,18 @@ export const metadata: Metadata = {
   description: "AI-powered financial SaaS dashboard",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex h-full min-h-screen bg-slate-50 font-sans text-slate-800">
-        {/* Sidebar */}
-        <Sidebar />
-
-        {/* Main area offset by sidebar width */}
-        <div className="flex flex-1 flex-col pl-64">
-          <TopBar />
-          <main className="flex-1 overflow-y-auto bg-white p-6">
-            {children}
-          </main>
-        </div>
+      <body className="h-full min-h-screen bg-slate-50 font-sans text-slate-800">
+        {children}
       </body>
     </html>
   );
