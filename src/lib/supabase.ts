@@ -36,3 +36,15 @@ export function getServiceSupabase(): SupabaseClient {
 
   return cached;
 }
+
+/**
+ * Convenience proxy that lazily calls getServiceSupabase().
+ * Allows importing as `import { supabase } from "@/lib/supabase"` without
+ * triggering an error at module-evaluation time when env vars are missing
+ * (e.g. during `next build`).
+ */
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    return (getServiceSupabase() as unknown as Record<string | symbol, unknown>)[prop];
+  },
+});
