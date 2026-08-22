@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# financial reports & data payloads
+*.pdf
+*.xlsx
+src/pipeline/extracted_data.json
+src/pipeline/scrubbed_data.json
+src/pipeline/pdpa_audit_report.json
+src/pipeline/chunked_documents.json
+src/pipeline/pydantic_financial_reports.json
+faiss_index/
+
+
+
+
