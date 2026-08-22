@@ -138,16 +138,11 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Platform Settings</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Configure PDPA Malaysia privacy controls, workspace reporting, and anomaly thresholds.
-          </p>
-        </div>
-        <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
-          <ShieldCheck size={14} className="text-emerald-600" /> Enterprise Config
-        </span>
+      <div className="border-b border-slate-200/80 pb-4">
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Platform Settings</h1>
+        <p className="text-xs text-slate-500 mt-0.5">
+          Configure PDPA Malaysia privacy controls, workspace reporting, and anomaly thresholds.
+        </p>
       </div>
 
       {/* Workspace */}
