@@ -1,15 +1,6 @@
-import { useNavigate } from "react-router-dom";
-import { Search, ShieldCheck, LogOut } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { Search, ShieldCheck } from "lucide-react";
 
 export default function TopBar() {
-  const navigate = useNavigate();
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    navigate("/login");
-  }
-
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/90 px-8 backdrop-blur-md">
       {/* Search Input */}
@@ -27,7 +18,7 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* Profile & Status & Logout */}
+      {/* Profile & Status */}
       <div className="flex items-center gap-4">
         {/* Compliance Pill */}
         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200/80">
@@ -47,17 +38,6 @@ export default function TopBar() {
             <span className="text-[10px] text-slate-400">Enterprise Admin</span>
           </div>
         </div>
-
-        {/* Sign Out Button */}
-        <button
-          onClick={handleLogout}
-          type="button"
-          title="Sign out of SmartFlow One"
-          className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-xs transition-all hover:bg-red-50 hover:text-red-600 hover:border-red-200 cursor-pointer"
-        >
-          <LogOut className="h-3.5 w-3.5" />
-          Sign Out
-        </button>
       </div>
     </header>
   );
