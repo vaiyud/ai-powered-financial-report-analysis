@@ -715,7 +715,7 @@ export default function DashboardPage() {
                         <CheckCircle2 className="text-emerald-600" size={16} />
                         Malaysian NRIC IC Numbers Scrubbed
                       </p>
-                      <p className="text-[11px] font-mono text-slate-500 mt-1">Regex Pattern: \d&#123;6&#125;-\d&#123;2&#125;-\d&#123;4&#125;</p>
+                      <p className="text-[11px] font-mono text-slate-500 mt-1">{"Regex Pattern: \\d{6}-\\d{2}-\\d{4}"}</p>
                     </div>
                     <span className="text-lg font-extrabold text-emerald-600">3,090 Tokens</span>
                   </div>
@@ -726,7 +726,7 @@ export default function DashboardPage() {
                         <CheckCircle2 className="text-emerald-600" size={16} />
                         Corporate Email Disclosures Masked
                       </p>
-                      <p className="text-[11px] font-mono text-slate-500 mt-1">Regex Pattern: [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+</p>
+                      <p className="text-[11px] font-mono text-slate-500 mt-1">{"Regex Pattern: [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+"}</p>
                     </div>
                     <span className="text-lg font-extrabold text-emerald-600">4,753 Tokens</span>
                   </div>
@@ -799,8 +799,8 @@ export default function DashboardPage() {
                   </Link>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </div>
