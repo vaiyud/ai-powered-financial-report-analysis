@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  FileText,
   TrendingUp,
   ShieldAlert,
   Sparkles,
@@ -34,7 +33,7 @@ export default function Sidebar() {
         </div>
         <div className="flex flex-col">
           <span className="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
-            FinSight AI
+            SmartFlow One
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -90,7 +89,7 @@ export default function Sidebar() {
             Zero PII Exposure Engine
           </p>
         </div>
-        <p className="mt-3 text-center text-[11px] text-slate-600">&copy; 2026 FinSight AI Platform</p>
+        <p className="mt-3 text-center text-[11px] text-slate-600">&copy; 2026 SmartFlow One Platform</p>
       </div>
     </aside>
   );

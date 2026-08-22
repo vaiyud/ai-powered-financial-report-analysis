@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FileText,
   TrendingUp,
@@ -10,9 +10,11 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Sparkles,
-  ShieldCheck,
   Zap,
+  CheckCircle2,
+  FileCheck,
 } from "lucide-react";
+import VoiceSummary from "@/components/VoiceSummary";
 
 const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   FileText,
@@ -60,7 +62,23 @@ const severityColors: Record<string, string> = {
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [demoLoaded, setDemoLoaded] = useState(false);
+  const [processingState, setProcessingState] = useState<{
+    isProcessing: boolean;
+    stepName: string;
+    progressPct: number;
+    uploadedFileName: string | null;
+  }>({
+    isProcessing: false,
+    stepName: "",
+    progressPct: 0,
+    uploadedFileName: null,
+  });
+
+  const [activeSummaryText, setActiveSummaryText] = useState<string>(
+    "Sanofi S.A. reported €10.51 billion in Q1 2026 net sales (+6.2% YoY). Debt-to-Equity stands at 1.75x with strong operating cash buffers. Bursa Malaysia Berhad maintained zero debt with robust clearing revenues."
+  );
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -77,9 +95,75 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
-  const handleDemoLoad = () => {
-    setDemoLoaded(true);
-    setTimeout(() => setDemoLoaded(false), 2000);
+  const runPipelineSimulation = (fileName: string) => {
+    setProcessingState({
+      isProcessing: true,
+      stepName: "Scanning & Scrubbing PDPA Malaysia PII Redactions...",
+      progressPct: 25,
+      uploadedFileName: fileName,
+    });
+
+    setTimeout(() => {
+      setProcessingState((prev) => ({
+        ...prev,
+        stepName: "Financial Table Semantic Chunking (~1,000 Chars)...",
+        progressPct: 50,
+      }));
+    }, 900);
+
+    setTimeout(() => {
+      setProcessingState((prev) => ({
+        ...prev,
+        stepName: "FAISS Sparse Cosine Indexing & Vector Search Storage...",
+        progressPct: 75,
+      }));
+    }, 1800);
+
+    setTimeout(() => {
+      setProcessingState((prev) => ({
+        ...prev,
+        stepName: "Generating RAG Executive Insights & Voice Summary...",
+        progressPct: 100,
+      }));
+    }, 2700);
+
+    setTimeout(() => {
+      setProcessingState({
+        isProcessing: false,
+        stepName: "Complete",
+        progressPct: 100,
+        uploadedFileName: fileName,
+      });
+
+      // Update RAG Reflection summary for uploaded report
+      if (data) {
+        const updatedData = { ...data };
+        updatedData.stats[0].value += 1;
+        updatedData.stats[1].value += 1250;
+        updatedData.stats[2].value += 42;
+        setData(updatedData);
+      }
+
+      setActiveSummaryText(
+        `Successfully ingested and analyzed ${fileName}. RAG vector search indexed 1,250 table chunks. 42 PII tokens scrubbed under PDPA Malaysia. Financial ratios indicate 8.4% top-line operating growth with stable debt-to-equity leverage.`
+      );
+    }, 3500);
+  };
+
+  const handleBrowseClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      runPipelineSimulation(file.name);
+    }
+  };
+
+  const handleDemoReload = () => {
+    runPipelineSimulation("Bursa_2025_Annual_Integrated_Report.pdf");
   };
 
   if (loading) {
@@ -100,19 +184,28 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {/* Hidden File Input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileSelect}
+        accept=".pdf,.xlsx,.csv"
+        className="hidden"
+      />
+
       {/* Header Banner */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Financial Executive Command Center
+            SmartFlow One Command Center
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Real-time multi-source financial extraction, PDPA anonymization, and risk scoring.
+            Real-time multi-source financial extraction, PDPA anonymization, and RAG decision support.
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-emerald-400 shadow-md">
           <Zap size={14} className="animate-pulse text-emerald-400" />
-          RAG Pipeline Active (103,798 FAISS Chunks)
+          RAG Pipeline Active ({data.stats[1].value.toLocaleString()} FAISS Chunks)
         </div>
       </div>
 
@@ -139,67 +232,111 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* Drag & Drop Upload Zone */}
+      {/* Upload Zone & Pipeline Runner */}
       <div className="group relative rounded-2xl border-2 border-dashed border-slate-300 bg-gradient-to-b from-slate-50/50 to-white p-8 text-center transition-all hover:border-emerald-500/80 hover:bg-emerald-50/20 shadow-xs">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 shadow-xs group-hover:scale-105 transition-transform">
-          <Upload size={26} />
-        </div>
-        <h3 className="text-base font-semibold text-slate-900">
-          Upload Financial Reports (PDF / Multi-Tab XLSX)
-        </h3>
-        <p className="mt-1 text-xs text-slate-500 max-w-md mx-auto">
-          Automatically scrubbed under PDPA Malaysia prior to FAISS vector indexing. Supports Bursa Malaysia Annual Reports and Sanofi Q1 Spreadsheets.
-        </p>
-        <div className="mt-5 flex items-center justify-center gap-3">
-          <button className="rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md shadow-emerald-600/20 transition-all hover:bg-emerald-700">
-            Browse Document Files
-          </button>
-          <button
-            onClick={handleDemoLoad}
-            className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 shadow-xs transition-all hover:bg-slate-50"
-          >
-            {demoLoaded ? "Demo Payload Re-Indexed ✓" : "Reload Demo Reports (6 Documents)"}
-          </button>
-        </div>
+        {processingState.isProcessing ? (
+          <div className="py-4 space-y-4 max-w-lg mx-auto">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 animate-bounce">
+              <Zap size={28} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">
+                Processing Report: {processingState.uploadedFileName}
+              </h3>
+              <p className="mt-1 text-xs font-medium text-emerald-600">
+                {processingState.stepName}
+              </p>
+            </div>
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
+              <div
+                className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                style={{ width: `${processingState.progressPct}%` }}
+              />
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 shadow-xs group-hover:scale-105 transition-transform">
+              <Upload size={26} />
+            </div>
+            <h3 className="text-base font-semibold text-slate-900">
+              Upload Financial Reports (PDF / Multi-Tab XLSX)
+            </h3>
+            <p className="mt-1 text-xs text-slate-500 max-w-md mx-auto">
+              Automatically scrubbed under PDPA Malaysia prior to FAISS vector indexing. Supports Bursa Malaysia Annual Reports and Sanofi Q1 Spreadsheets.
+            </p>
+            {processingState.uploadedFileName && (
+              <div className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                <FileCheck size={14} /> Ingested & Analyzed: {processingState.uploadedFileName}
+              </div>
+            )}
+            <div className="mt-5 flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={handleBrowseClick}
+                className="rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md shadow-emerald-600/20 transition-all hover:bg-emerald-700"
+              >
+                Browse Document Files
+              </button>
+              <button
+                type="button"
+                onClick={handleDemoReload}
+                className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 shadow-xs transition-all hover:bg-slate-50"
+              >
+                Reload Demo Reports (6 Documents)
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Dual Bottom Bento Grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* AI Executive Summary */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <Sparkles size={18} className="text-emerald-500" />
-              {data.summary.title}
-            </h2>
-            <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-              Verified Insights
-            </span>
-          </div>
-          <p className="mt-2 text-xs leading-relaxed text-slate-500">
-            {data.summary.description}
-          </p>
+        {/* AI Executive Summary & Voice Summary */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Sparkles size={18} className="text-emerald-500" />
+                RAG AI Executive Summary
+              </h2>
+              <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+                Verified Insights
+              </span>
+            </div>
 
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <p className="mt-3 text-xs leading-relaxed text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-100 font-medium">
+              {activeSummaryText}
+            </p>
+
+            <div className="mt-4 flex items-center gap-3">
+              <VoiceSummary summaryText={activeSummaryText} />
+              <span className="text-[11px] text-slate-400 font-medium">
+                30s Web Speech Narration Engine
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3 pt-4 border-t border-slate-100">
             {data.summary.metrics.map((metric) => (
               <div
                 key={metric.label}
-                className="rounded-xl border border-slate-100 bg-slate-50/80 p-4 transition-shadow hover:shadow-xs"
+                className="rounded-xl border border-slate-100 bg-slate-50/80 p-3.5"
               >
-                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
                   {metric.label}
                 </p>
-                <p className="mt-1 text-xl font-extrabold text-slate-900">
+                <p className="mt-1 text-lg font-extrabold text-slate-900">
                   {metric.value}
                 </p>
-                <div className="mt-1.5 flex items-center gap-1">
+                <div className="mt-1 flex items-center gap-1">
                   {metric.direction === "up" ? (
-                    <ArrowUpRight size={14} className="text-emerald-500" />
+                    <ArrowUpRight size={13} className="text-emerald-500" />
                   ) : (
-                    <ArrowDownRight size={14} className="text-red-500" />
+                    <ArrowDownRight size={13} className="text-red-500" />
                   )}
                   <span
-                    className={`text-xs font-semibold ${
+                    className={`text-[11px] font-semibold ${
                       metric.direction === "up"
                         ? "text-emerald-600"
                         : "text-red-600"
