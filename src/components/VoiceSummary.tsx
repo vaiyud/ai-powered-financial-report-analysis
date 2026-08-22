@@ -1,47 +1,22 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Volume2, Square, VolumeX } from "lucide-react";
-
-/**
- * VoiceSummary
- *
- * Reads a condensed version of the financial analysis aloud using the
- * browser's built-in Web Speech API (window.speechSynthesis). Designed to
- * deliver a roughly 30-second spoken summary.
- *
- * Gracefully degrades when speech synthesis is unavailable, and cancels any
- * in-flight utterance on unmount so audio never outlives the component.
- */
+import { Volume2, Square, Sparkles, ChevronDown, ChevronUp, Mic } from "lucide-react";
 
 interface VoiceSummaryProps {
-  /** The final financial analysis text to summarize and read aloud. */
   summaryText: string;
-  /**
-   * Approximate spoken length target in words. At an average speaking rate of
-   * ~150 wpm, ~75 words lands near 30 seconds. Defaults to 75.
-   */
   maxWords?: number;
 }
 
-/**
- * Condenses raw analysis text into something short enough to speak in ~30s:
- * strips common markdown, collapses whitespace, and trims to the first few
- * sentences up to a word budget.
- */
 function condense(text: string, maxWords: number): string {
   const cleaned = text
-    // Strip markdown emphasis, headings, list markers, and inline code.
     .replace(/[#*_`>]/g, " ")
-    // Drop markdown link syntax, keeping the visible label.
     .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-    // Collapse all whitespace (including newlines) to single spaces.
     .replace(/\s+/g, " ")
     .trim();
 
   if (!cleaned) return "";
 
-  // Prefer whole sentences: accumulate until we hit the word budget.
   const sentences = cleaned.match(/[^.!?]+[.!?]*/g) ?? [cleaned];
   const picked: string[] = [];
   let wordCount = 0;
@@ -55,8 +30,6 @@ function condense(text: string, maxWords: number): string {
   }
 
   let result = picked.join(" ").trim();
-
-  // Hard cap as a fallback if a single sentence blew past the budget.
   const resultWords = result.split(/\s+/).filter(Boolean);
   if (resultWords.length > maxWords) {
     result = resultWords.slice(0, maxWords).join(" ") + "…";
@@ -65,28 +38,24 @@ function condense(text: string, maxWords: number): string {
   return result;
 }
 
-type SupportState = "checking" | "supported" | "unsupported";
-
 export default function VoiceSummary({
   summaryText,
   maxWords = 75,
 }: VoiceSummaryProps) {
-  const [support, setSupport] = useState<SupportState>("checking");
+  const [support, setSupport] = useState<boolean>(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
-
-  // Hold the current utterance so we can detach handlers during cleanup.
+  const [rate, setRate] = useState<number>(1.0);
+  const [showTranscript, setShowTranscript] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  // Detect Web Speech API support once, on mount.
   useEffect(() => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      setSupport("supported");
+      setSupport(true);
     } else {
-      setSupport("unsupported");
+      setSupport(false);
     }
   }, []);
 
-  // Clear handlers off an utterance to avoid state updates after unmount.
   const detachUtterance = useCallback(() => {
     const u = utteranceRef.current;
     if (u) {
@@ -97,7 +66,6 @@ export default function VoiceSummary({
     }
   }, []);
 
-  // Stop any speech and reset state.
   const stop = useCallback(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
@@ -105,7 +73,6 @@ export default function VoiceSummary({
     setIsSpeaking(false);
   }, [detachUtterance]);
 
-  // Cancel speech if the component unmounts (e.g. user navigates away).
   useEffect(() => {
     return () => {
       if (typeof window !== "undefined" && "speechSynthesis" in window) {
@@ -121,12 +88,11 @@ export default function VoiceSummary({
     const spokenText = condense(summaryText, maxWords);
     if (!spokenText) return;
 
-    // Reset any prior speech before starting fresh.
     window.speechSynthesis.cancel();
     detachUtterance();
 
     const utterance = new SpeechSynthesisUtterance(spokenText);
-    utterance.rate = 1;
+    utterance.rate = rate;
     utterance.pitch = 1;
     utterance.lang = "en-US";
 
@@ -142,7 +108,7 @@ export default function VoiceSummary({
 
     utteranceRef.current = utterance;
     window.speechSynthesis.speak(utterance);
-  }, [summaryText, maxWords, detachUtterance]);
+  }, [summaryText, maxWords, rate, detachUtterance]);
 
   const handleClick = useCallback(() => {
     if (isSpeaking) {
@@ -152,43 +118,107 @@ export default function VoiceSummary({
     }
   }, [isSpeaking, play, stop]);
 
-  const hasText = summaryText.trim().length > 0;
-  const disabled = support !== "supported" || !hasText;
-
-  if (support === "unsupported") {
-    return (
-      <div className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500">
-        <VolumeX className="h-4 w-4" aria-hidden="true" />
-        Audio summary isn&apos;t supported in this browser.
-      </div>
-    );
-  }
+  const spokenText = condense(summaryText, maxWords);
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      disabled={disabled}
-      aria-pressed={isSpeaking}
-      aria-label={isSpeaking ? "Pause or stop audio summary" : "Play audio summary"}
-      className={
-        "inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 " +
-        (isSpeaking
-          ? "bg-slate-800 text-white hover:bg-slate-900 focus-visible:ring-slate-500"
-          : "bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-500")
-      }
-    >
-      {isSpeaking ? (
-        <>
-          <Square className="h-4 w-4" aria-hidden="true" />
-          Pause / Stop
-        </>
-      ) : (
-        <>
-          <Volume2 className="h-4 w-4" aria-hidden="true" />
-          Play Audio Summary
-        </>
-      )}
-    </button>
+    <div className="w-full h-full rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xs text-slate-100 flex flex-col justify-between space-y-4">
+      {/* Header */}
+      <div>
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              <Mic size={16} />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-white tracking-tight">C-Suite Voice Briefing</h3>
+              <p className="text-[10px] text-slate-400">30-Sec AI Speech Synthesis</p>
+            </div>
+          </div>
+          <span className="rounded-full bg-slate-800 px-2.5 py-0.5 text-[10px] font-mono text-emerald-400 border border-slate-700">
+            Web Speech API
+          </span>
+        </div>
+
+        {/* Spoken Text Preview / Waveform */}
+        <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/80 p-3.5">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              {isSpeaking ? "🔊 Playing Briefing..." : "Ready to Play"}
+            </span>
+
+            {/* Sound Wave Animation */}
+            {isSpeaking && (
+              <div className="flex items-end gap-1 h-3">
+                <span className="w-1 bg-emerald-400 h-2 animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="w-1 bg-emerald-400 h-3 animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="w-1 bg-emerald-400 h-1.5 animate-bounce" style={{ animationDelay: "300ms" }} />
+                <span className="w-1 bg-emerald-400 h-3 animate-bounce" style={{ animationDelay: "450ms" }} />
+              </div>
+            )}
+          </div>
+
+          <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed">
+            &ldquo;{spokenText}&rdquo;
+          </p>
+        </div>
+      </div>
+
+      {/* Controls Footer */}
+      <div className="space-y-3 pt-2">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleClick}
+            disabled={!support}
+            className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-xs font-extrabold transition-all cursor-pointer shadow-md ${
+              isSpeaking
+                ? "bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30"
+                : "bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 hover:brightness-110"
+            }`}
+          >
+            {isSpeaking ? (
+              <>
+                <Square size={14} fill="currentColor" /> Pause Briefing
+              </>
+            ) : (
+              <>
+                <Volume2 size={15} /> Play Audio Summary
+              </>
+            )}
+          </button>
+
+          {/* Speed Selector */}
+          <div className="flex rounded-xl bg-slate-950 border border-slate-800 p-1 text-[10px] font-bold">
+            {[1.0, 1.25, 1.5].map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setRate(s)}
+                className={`px-2 py-1 rounded-lg transition-colors cursor-pointer ${
+                  rate === s ? "bg-emerald-500 text-slate-950" : "text-slate-400 hover:text-white"
+                }`}
+              >
+                {s}x
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowTranscript(!showTranscript)}
+          className="w-full text-center text-[11px] font-semibold text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1 cursor-pointer"
+        >
+          {showTranscript ? "Hide Full Script" : "Show Full Script"}
+          {showTranscript ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+        </button>
+
+        {showTranscript && (
+          <div className="mt-2 rounded-xl border border-slate-800 bg-slate-950 p-3 text-[11px] text-slate-400 leading-relaxed max-h-32 overflow-y-auto">
+            {summaryText}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
