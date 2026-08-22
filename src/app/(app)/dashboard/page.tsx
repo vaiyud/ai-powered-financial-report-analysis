@@ -18,8 +18,6 @@ import {
 } from "lucide-react";
 import VoiceSummary from "@/components/VoiceSummary";
 
-export const dynamic = "force-dynamic";
-
 const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   FileText,
   TrendingUp,
