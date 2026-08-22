@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronUp, Sparkles, CheckCircle2 } from "lucide-react";
 
 type Priority = "high" | "medium" | "low";
 
@@ -15,9 +15,9 @@ interface Recommendation {
 }
 
 const priorityConfig: Record<Priority, { bg: string; text: string; label: string }> = {
-  high: { bg: "bg-red-100", text: "text-red-700", label: "High Priority" },
-  medium: { bg: "bg-amber-100", text: "text-amber-700", label: "Medium Priority" },
-  low: { bg: "bg-blue-100", text: "text-blue-700", label: "Low Priority" },
+  high: { bg: "bg-red-50 text-red-700 ring-red-200", text: "text-red-700", label: "High Priority Action" },
+  medium: { bg: "bg-amber-50 text-amber-700 ring-amber-200", text: "text-amber-700", label: "Medium Priority Action" },
+  low: { bg: "bg-sky-50 text-sky-700 ring-sky-200", text: "text-sky-700", label: "Low Priority Action" },
 };
 
 function RecommendationCard({
@@ -31,36 +31,37 @@ function RecommendationCard({
   const cfg = priorityConfig[rec.priority];
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+    <div className="group rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-start gap-4">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-600">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-extrabold text-white shadow-xs">
           {index + 1}
         </span>
 
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${cfg.bg} ${cfg.text}`}
+              className={`inline-flex items-center rounded-full px-3 py-0.5 text-xs font-bold ring-1 ${cfg.bg}`}
             >
               {cfg.label}
             </span>
-            <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-0.5 text-xs font-semibold text-slate-600">
+              <CheckCircle2 size={12} className="text-emerald-500" />
               {rec.category}
             </span>
           </div>
 
-          <h3 className="mt-2 text-base font-semibold text-slate-900">
+          <h3 className="mt-2.5 text-base font-bold text-slate-900">
             {rec.title}
           </h3>
 
-          <p className="mt-2 text-sm leading-relaxed text-slate-700">
+          <p className="mt-2 text-xs leading-relaxed text-slate-700">
             {rec.detail}
           </p>
 
-          <div className="mt-3">
+          <div className="mt-4">
             <button
               onClick={() => setExpanded(!expanded)}
-              className="flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200/80 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
               aria-expanded={expanded}
             >
               Why this recommendation?
@@ -68,7 +69,8 @@ function RecommendationCard({
             </button>
 
             {expanded && (
-              <div className="mt-2 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 text-sm leading-relaxed text-slate-600">
+              <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50/80 p-4 text-xs leading-relaxed text-slate-600 shadow-xs">
+                <p className="font-bold text-slate-800 mb-1">AI Context & Executive Reasoning:</p>
                 {rec.reasoning}
               </div>
             )}
@@ -98,7 +100,7 @@ export default function AIRecommendationsPage() {
                 priority: rIdx === 0 ? "high" : "medium",
                 category: s.company_name,
                 title: rText,
-                detail: `Strategic advice based on ${s.fiscal_period} financial results for ${s.company_name}.`,
+                detail: `Strategic recommendation derived from ${s.fiscal_period} financial metrics for ${s.company_name}.`,
                 reasoning: s.executive_summary
               });
             });
@@ -146,15 +148,15 @@ export default function AIRecommendationsPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
             AI Executive Summaries & Recommendations
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Prioritized strategic recommendations generated from Phase 4 multi-year trend and risk analysis.
+            Prioritized CFO action items generated from Phase 4 multi-year trend and risk analysis.
           </p>
         </div>
-        <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">
-          <Sparkles size={14} /> AI Analysis Powered
+        <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200/80">
+          <Sparkles size={14} className="text-emerald-600" /> CFO Decision Support
         </span>
       </div>
 

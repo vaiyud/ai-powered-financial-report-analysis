@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase-browser";
-import { ShieldAlert, AlertTriangle, Info, Bookmark } from "lucide-react";
+import { ShieldAlert, AlertTriangle, Info, Bookmark, ShieldCheck } from "lucide-react";
 
 type Severity = "high" | "medium" | "low";
 
@@ -22,22 +21,22 @@ const severityConfig: Record<
 > = {
   high: {
     border: "border-l-red-500",
-    bg: "bg-red-50",
+    bg: "bg-red-50/70",
     text: "text-red-700",
     icon: ShieldAlert,
     label: "High Severity",
   },
   medium: {
     border: "border-l-amber-500",
-    bg: "bg-amber-50",
+    bg: "bg-amber-50/70",
     text: "text-amber-700",
     icon: AlertTriangle,
     label: "Medium Severity",
   },
   low: {
-    border: "border-l-blue-500",
-    bg: "bg-blue-50",
-    text: "text-blue-700",
+    border: "border-l-sky-500",
+    bg: "bg-sky-50/70",
+    text: "text-sky-700",
     icon: Info,
     label: "Low Severity",
   },
@@ -53,7 +52,7 @@ export default function RiskAnalysisPage() {
         const res = await fetch("/api/analysis/risks");
         const json = await res.json();
         if (json.success && json.risks && json.risks.length > 0) {
-          const formatted = json.risks.map((r: any, idx: int) => ({
+          const formatted = json.risks.map((r: any, idx: number) => ({
             id: r.risk_id || `r_${idx}`,
             category: r.category || "Operational & Strategic Risk",
             severity: (r.severity || "medium").toLowerCase() as Severity,
@@ -72,7 +71,7 @@ export default function RiskAnalysisPage() {
               title: "Sanofi S.A. — Elevated Debt-to-Equity Ratio",
               explanation: "Debt-to-Equity ratio of 1.75x requires active maturity structure monitoring and interest rate hedging.",
               mitigation: "Active interest rate swaps and liquidity buffers.",
-              provenance: "2026_04_23_Sanofi_Q1_2026_Income_Statement.xlsx (Balance Sheet)"
+              provenance: "2026_04_23_Sanofi_Q1_2026_Income_Statement.xlsx (Balance Sheet Tab)"
             },
             {
               id: "r2",
@@ -110,11 +109,18 @@ export default function RiskAnalysisPage() {
   return (
     <div className="space-y-8">
       {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Risk Severity Matrix</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Categorized, scored, and verified risk factors with mitigation evaluations and page-level provenance.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Risk Severity Matrix & Assessment
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Categorized, scored, and verified risk factors with mitigation evaluations and page-level provenance.
+          </p>
+        </div>
+        <span className="flex items-center gap-1.5 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-emerald-400">
+          <ShieldCheck size={14} /> Risk Scoring Active
+        </span>
       </div>
 
       {/* Summary count cards */}
@@ -128,12 +134,14 @@ export default function RiskAnalysisPage() {
           return (
             <div
               key={sev}
-              className={`flex items-center gap-4 rounded-xl border border-slate-200 p-5 shadow-sm ${cfg.bg}`}
+              className={`flex items-center gap-4 rounded-2xl border border-slate-200/80 p-5 shadow-xs transition-transform hover:-translate-y-0.5 ${cfg.bg}`}
             >
-              <Icon size={28} className={cfg.text} />
+              <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-xs ${cfg.text}`}>
+                <Icon size={24} />
+              </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">{counts[sev]}</p>
-                <p className={`text-sm font-medium ${cfg.text}`}>{cfg.label}</p>
+                <p className="text-2xl font-extrabold text-slate-900">{counts[sev]}</p>
+                <p className={`text-xs font-semibold ${cfg.text}`}>{cfg.label}</p>
               </div>
             </div>
           );
@@ -147,31 +155,32 @@ export default function RiskAnalysisPage() {
           return (
             <div
               key={risk.id}
-              className={`rounded-xl border border-slate-200 border-l-4 ${cfg.border} bg-white p-5 shadow-sm`}
+              className={`group rounded-2xl border border-slate-200/80 border-l-4 ${cfg.border} bg-white p-6 shadow-xs transition-shadow hover:shadow-md`}
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${cfg.bg} ${cfg.text}`}
+                    className={`inline-flex items-center rounded-full px-3 py-0.5 text-xs font-bold uppercase tracking-wider ${cfg.bg} ${cfg.text}`}
                   >
                     {cfg.label}
                   </span>
-                  <h3 className="text-base font-semibold text-slate-900">
+                  <h3 className="text-base font-bold text-slate-900">
                     {risk.title}
                   </h3>
                 </div>
-                <span className="flex items-center gap-1 text-xs font-medium text-slate-400">
-                  <Bookmark size={14} /> {risk.provenance}
+                <span className="flex items-center gap-1.5 rounded-lg bg-slate-50 px-2.5 py-1 text-xs font-mono text-slate-500 border border-slate-200/60">
+                  <Bookmark size={12} className="text-slate-400" />
+                  {risk.provenance}
                 </span>
               </div>
 
-              <p className="mt-3 text-sm leading-relaxed text-slate-700">
+              <p className="mt-3 text-xs leading-relaxed text-slate-700">
                 {risk.explanation}
               </p>
 
-              <div className="mt-3 rounded-lg border border-slate-100 bg-slate-50 p-3">
-                <p className="text-xs font-semibold text-slate-500">Mitigation Strategy:</p>
-                <p className="mt-0.5 text-xs text-slate-600">{risk.mitigation}</p>
+              <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/80 p-3.5">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Mitigation Evaluation Strategy:</p>
+                <p className="mt-1 text-xs text-slate-600 font-medium">{risk.mitigation}</p>
               </div>
             </div>
           );
