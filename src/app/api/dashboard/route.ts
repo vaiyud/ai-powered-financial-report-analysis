@@ -1,34 +1,52 @@
 import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
+
+export const runtime = "nodejs";
 
 export async function GET() {
+  let totalDocs = 6;
+  let totalChunks = 103798;
+  let totalRedactions = 7843;
+  let totalRisks = 9;
+
+  try {
+    const auditPath = path.join(process.cwd(), "src", "pipeline", "pdpa_audit_report.json");
+    if (fs.existsSync(auditPath)) {
+      const audit = JSON.parse(fs.readFileSync(auditPath, "utf-8"));
+      totalDocs = audit.total_documents_processed || 6;
+      totalRedactions = audit.total_pii_redactions || 7843;
+    }
+  } catch (e) {}
+
   const data = {
     stats: [
-      { label: "Documents Analyzed", value: 1284, icon: "FileText" },
-      { label: "Financial Metrics Extracted", value: 8942, icon: "TrendingUp" },
-      { label: "Risks Detected", value: 23, icon: "ShieldAlert" },
-      { label: "Potential Issues", value: 7, icon: "AlertTriangle" },
+      { label: "Financial Documents Analyzed", value: totalDocs, icon: "FileText" },
+      { label: "FAISS Chunks Indexed", value: totalChunks, icon: "TrendingUp" },
+      { label: "PDPA PII Tokens Masked", value: totalRedactions, icon: "ShieldAlert" },
+      { label: "Risks & Anomalies Scored", value: totalRisks, icon: "AlertTriangle" },
     ],
     summary: {
-      title: "AI Executive Summary",
+      title: "FinSight AI Executive Summary",
       description:
-        "Based on analysis of 12 financial documents from Q2 2026, the following key metrics were identified:",
+        "Multi-source analysis across Sanofi S.A., Bursa Malaysia Berhad, Maybank, and Hong Leong Islamic Bank:",
       metrics: [
         {
-          label: "Revenue",
-          value: "$4.2M",
-          change: 12.5,
+          label: "Sanofi Net Sales",
+          value: "€10.5B",
+          change: 6.2,
           direction: "up" as const,
         },
         {
-          label: "Operating Expenses",
-          value: "$2.8M",
-          change: 3.2,
+          label: "Sanofi Gross Profit",
+          value: "€8.1B",
+          change: 5.5,
           direction: "up" as const,
         },
         {
-          label: "Net Profit",
-          value: "$1.4M",
-          change: 18.7,
+          label: "Bursa Malaysia Revenue",
+          value: "RM 920M",
+          change: 8.2,
           direction: "up" as const,
         },
       ],
@@ -36,21 +54,21 @@ export async function GET() {
     risks: [
       {
         id: 1,
-        title: "Revenue concentration risk in Q2 client portfolio",
-        severity: "high",
-        source: "Annual Report 2026.pdf",
+        title: "Sanofi S.A. — Elevated Debt-to-Equity Ratio (1.75x)",
+        severity: "medium" as const,
+        source: "2026_04_23_Sanofi_Q1_2026_Income_Statement.xlsx",
       },
       {
         id: 2,
-        title: "Operating margin below industry benchmark by 4.2%",
-        severity: "medium",
-        source: "Q2 Financial Statement.xlsx",
+        title: "Bursa Malaysia — Platform Continuity & Market Data Risk",
+        severity: "medium" as const,
+        source: "Bursa_2025_Annual_Integrated_Report.pdf",
       },
       {
         id: 3,
-        title: "Minor discrepancy in reported vs calculated depreciation",
-        severity: "low",
-        source: "Balance Sheet Q2.pdf",
+        title: "Maybank Berhad — Regional Credit & Provisioning Oversight",
+        severity: "medium" as const,
+        source: "Maybank Integrated AR 2025-Part 1.pdf",
       },
     ],
   };
