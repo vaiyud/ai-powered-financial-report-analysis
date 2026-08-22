@@ -1,48 +1,21 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { ShieldCheck, User, LogOut, Search, Bell } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { useNavigate } from "react-router-dom";
+import { Search, ShieldCheck, LogOut } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export default function TopBar() {
-  const router = useRouter();
-  const [user, setUser] = useState<SupabaseUser | null>(null);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-    });
-  }, []);
+  const navigate = useNavigate();
 
   async function handleLogout() {
-    const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
+    navigate("/login");
   }
-
-  const displayName =
-    user?.user_metadata?.full_name ||
-    user?.user_metadata?.name ||
-    user?.email ||
-    "Finance Lead";
-
-  const initials = displayName
-    .split(" ")
-    .map((w: string) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/90 px-8 backdrop-blur-md">
-      {/* Search Bar / Workspace Breadcrumb */}
+      {/* Search Input */}
       <div className="flex items-center gap-3">
         <div className="relative flex items-center">
-          <Search size={16} className="absolute left-3.5 text-slate-400" />
+          <Search className="absolute left-3.5 h-4 w-4 text-slate-400" />
           <input
             type="text"
             placeholder="Search financial metrics, company, or risk item (⌘K)..."
@@ -54,35 +27,35 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* Right Controls: Session Status + User Badge + Logout */}
+      {/* Profile & Status & Logout */}
       <div className="flex items-center gap-4">
-        {/* Encrypted PDPA Session pill */}
+        {/* Compliance Pill */}
         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200/80">
-          <ShieldCheck size={14} className="text-emerald-600" />
+          <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
           PDPA Encrypted Session
         </span>
 
-        {/* User Profile */}
+        {/* Profile Avatar */}
         <div className="flex items-center gap-2.5 border-l border-slate-200/80 pl-4">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-slate-900 to-slate-800 text-white font-semibold text-xs shadow-xs">
-            {user ? initials : "FL"}
+            FL
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-semibold text-slate-900 truncate max-w-[120px]">
-              {displayName}
+              Finance Lead
             </span>
             <span className="text-[10px] text-slate-400">Enterprise Admin</span>
           </div>
         </div>
 
-        {/* Logout button */}
+        {/* Sign Out Button */}
         <button
           onClick={handleLogout}
           type="button"
           title="Sign out of SmartFlow One"
-          className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-xs transition-all hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+          className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-xs transition-all hover:bg-red-50 hover:text-red-600 hover:border-red-200 cursor-pointer"
         >
-          <LogOut size={14} />
+          <LogOut className="h-3.5 w-3.5" />
           Sign Out
         </button>
       </div>
