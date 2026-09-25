@@ -9,11 +9,8 @@ import {
   Lock,
   Settings,
   User,
-  Camera,
   CheckCircle2,
-  Mail,
   Building,
-  Shield,
   Command,
   Bell,
 } from "lucide-react";
@@ -43,49 +40,35 @@ const SEARCH_ITEMS: SearchItem[] = [
   },
   {
     id: "s3",
-    title: "Sanofi S.A. Debt-to-Equity Ratio Flag (1.75x Leverage)",
-    category: "Risk Anomaly",
+    title: "Short-Term Debt Facility & Solvency Anomaly (€32.8M)",
+    category: "Risk Matrix",
     link: "/risk-analysis",
     icon: AlertTriangle,
   },
   {
     id: "s4",
-    title: "Bursa Malaysia Platform Continuity & Cyber Resilience",
-    category: "Risk Anomaly",
-    link: "/risk-analysis",
-    icon: AlertTriangle,
-  },
-  {
-    id: "s5",
-    title: "PDPA Malaysia Act 2010 Audit (7,843 PII Tokens Scrubbed)",
-    category: "Privacy Audit",
-    link: "/privacy-center",
-    icon: Lock,
-  },
-  {
-    id: "s6",
-    title: "Evaluate Interest Rate Hedging & Debt Restructuring",
-    category: "AI Recommendation",
+    title: "Working Capital Optimization & Cash Flow Recovery",
+    category: "AI Recommendations",
     link: "/ai-recommendations",
     icon: Sparkles,
   },
   {
-    id: "s7",
-    title: "PDPA Anonymization & RAG Engine Settings",
-    category: "Settings",
-    link: "/settings",
-    icon: Settings,
+    id: "s5",
+    title: "PDPA Malaysia Compliance & PII Token Masking",
+    category: "Privacy Center",
+    link: "/privacy-center",
+    icon: Lock,
   },
 ];
 
-const pathTitleMap: Record<string, string> = {
-  "/": "Executive Command Center",
-  "/dashboard": "Executive Command Center",
-  "/financial-insights": "Financial Insights & Provenance",
-  "/risk-analysis": "Risk Severity Matrix",
-  "/ai-recommendations": "AI CFO Recommendations & Simulator",
-  "/privacy-center": "PDPA Privacy & Compliance Center",
-  "/settings": "Platform & Agent Settings",
+const pathTitleMap: Record<string, { title: string; subtitle: string }> = {
+  "/": { title: "Executive Overview", subtitle: "Real-time financial performance and AI risk analysis" },
+  "/dashboard": { title: "Executive Overview", subtitle: "Real-time financial performance and AI risk analysis" },
+  "/financial-insights": { title: "Financial Insights & Trends", subtitle: "Income statement analysis and document provenance" },
+  "/risk-analysis": { title: "Risk Severity Matrix", subtitle: "Automated anomaly detection across disclosures" },
+  "/ai-recommendations": { title: "AI CFO Recommendations", subtitle: "Actionable board items & What-If scenario modeler" },
+  "/privacy-center": { title: "PDPA Compliance Center", subtitle: "Zero-exposure PII masking and data retention controls" },
+  "/settings": { title: "Platform Settings", subtitle: "API keys, model parameters, and preferences" },
 };
 
 export default function TopBar() {
@@ -93,11 +76,13 @@ export default function TopBar() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchModal, setShowSearchModal] = useState(false);
-  const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
-  const currentTitle = pathTitleMap[location.pathname] || "SmartFlow Intelligence";
+  const currentRoute = pathTitleMap[location.pathname] || {
+    title: "SmartFlow One",
+    subtitle: "Financial Intelligence",
+  };
 
   // Hotkey listener (Cmd+K / Ctrl+K)
   useEffect(() => {
@@ -108,7 +93,6 @@ export default function TopBar() {
       }
       if (e.key === "Escape") {
         setShowSearchModal(false);
-        setShowProfileDrawer(false);
         setShowNotifications(false);
       }
     };
@@ -122,27 +106,28 @@ export default function TopBar() {
   );
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-800/80 bg-slate-950/80 px-6 backdrop-blur-xl">
-      {/* Page Title & Breadcrumb */}
-      <div className="flex items-center gap-3">
-        <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-2">
-          {currentTitle}
-          <span className="rounded bg-slate-900 px-2 py-0.5 text-[10px] font-mono text-emerald-400 border border-slate-800">
-            LIVE TELEMETRY
-          </span>
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200/90 bg-white/95 px-6 backdrop-blur-md shadow-xs">
+      {/* Page Title & Subtitle */}
+      <div>
+        <h1 className="text-base font-bold tracking-tight text-slate-900">
+          {currentRoute.title}
         </h1>
+        <p className="text-xs text-slate-500 hidden sm:block">
+          {currentRoute.subtitle}
+        </p>
       </div>
 
-      {/* Right Controls: Command Bar, Notifications, Profile */}
+      {/* Right Controls: Search, Notifications, Profile */}
       <div className="flex items-center gap-3">
         {/* Quick Search Trigger */}
         <button
           onClick={() => setShowSearchModal(true)}
-          className="flex items-center gap-2.5 rounded-xl bg-slate-900 hover:bg-slate-850 px-3.5 py-1.5 text-xs text-slate-400 border border-slate-800 transition-colors"
+          className="flex items-center gap-2.5 rounded-xl bg-slate-100/90 hover:bg-slate-200/70 px-3.5 py-1.5 text-xs text-slate-600 border border-slate-200 transition-colors"
         >
-          <Search className="h-3.5 w-3.5 text-slate-400" />
-          <span>Quick search or command...</span>
-          <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded bg-slate-800 px-1.5 py-0.5 text-[10px] font-mono text-slate-300 border border-slate-700">
+          <Search className="h-3.5 w-3.5 text-slate-500" />
+          <span className="hidden md:inline">Search metrics, reports, or risks...</span>
+          <span className="md:hidden">Search...</span>
+          <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded bg-white px-1.5 py-0.5 text-[10px] font-mono text-slate-500 border border-slate-300 shadow-2xs">
             <Command className="h-2.5 w-2.5" /> K
           </kbd>
         </button>
@@ -151,29 +136,31 @@ export default function TopBar() {
         <div className="relative">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 hover:bg-slate-850 text-slate-300 border border-slate-800 transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 transition-colors"
           >
             <Bell className="h-4 w-4" />
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-emerald-400" />
+            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white" />
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-slate-900 border border-slate-800 p-4 shadow-2xl z-50">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                <span className="text-xs font-bold text-white">Agent Telemetry Alerts</span>
-                <span className="text-[10px] font-mono text-emerald-400">All Verified</span>
+            <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-white border border-slate-200 p-4 shadow-xl z-50">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                <span className="text-xs font-bold text-slate-900">Analysis Notifications</span>
+                <span className="text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  All Systems Verified
+                </span>
               </div>
               <div className="mt-3 space-y-2 text-xs">
-                <div className="rounded-lg bg-slate-950 p-2.5 border border-slate-800">
-                  <p className="font-semibold text-slate-200">Adversarial Critic Passed</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
+                <div className="rounded-xl bg-slate-50 p-2.5 border border-slate-200/80">
+                  <p className="font-semibold text-slate-800">CFO Summary Verified</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
                     Sanofi €10.51B revenue claim verified against Page 12.
                   </p>
                 </div>
-                <div className="rounded-lg bg-slate-950 p-2.5 border border-slate-800">
-                  <p className="font-semibold text-slate-200">PDPA Scrubbing Complete</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
-                    7,843 PII tokens masked with 0 data exfiltration.
+                <div className="rounded-xl bg-slate-50 p-2.5 border border-slate-200/80">
+                  <p className="font-semibold text-slate-800">PDPA Compliance Active</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Zero PII tokens transmitted to external inference.
                   </p>
                 </div>
               </div>
@@ -181,36 +168,35 @@ export default function TopBar() {
           )}
         </div>
 
-        {/* Profile Avatar */}
-        <button
-          onClick={() => setShowProfileDrawer(true)}
-          className="flex items-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-850 px-2.5 py-1.5 border border-slate-800 transition-colors"
-        >
-          <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs">
+        {/* User Profile */}
+        <div className="flex items-center gap-2 rounded-xl bg-slate-100/80 px-2.5 py-1.5 border border-slate-200">
+          <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold text-xs">
             FL
           </div>
-          <span className="hidden md:inline text-xs font-semibold text-slate-200">Finance Lead</span>
-        </button>
+          <span className="hidden md:inline text-xs font-semibold text-slate-800">
+            Finance Lead
+          </span>
+        </div>
       </div>
 
-      {/* Command Palette Modal */}
+      {/* Search Modal */}
       {showSearchModal && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/80 backdrop-blur-md pt-20 px-4">
-          <div className="w-full max-w-xl rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl overflow-hidden">
-            <div className="flex items-center gap-3 border-b border-slate-800 px-4 py-3">
-              <Search className="h-4 w-4 text-emerald-400" />
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/40 backdrop-blur-xs pt-20 px-4">
+          <div className="w-full max-w-xl rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden">
+            <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-3">
+              <Search className="h-4 w-4 text-emerald-600" />
               <input
                 ref={searchInputRef}
                 autoFocus
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Type a metric, company, or command..."
-                className="w-full bg-transparent text-sm text-white placeholder-slate-500 focus:outline-none"
+                placeholder="Search financial metrics, company disclosures, or risks..."
+                className="w-full bg-transparent text-sm text-slate-900 placeholder-slate-400 focus:outline-none"
               />
               <button
                 onClick={() => setShowSearchModal(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -231,18 +217,18 @@ export default function TopBar() {
                         navigate(item.link);
                         setShowSearchModal(false);
                       }}
-                      className="flex items-center justify-between rounded-xl p-3 text-xs hover:bg-slate-800 cursor-pointer transition-colors"
+                      className="flex items-center justify-between rounded-xl p-3 text-xs hover:bg-slate-50 cursor-pointer transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-950 text-emerald-400 border border-slate-800">
-                          <Icon className="h-3.5 w-3.5" />
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100">
+                          <Icon className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="font-semibold text-slate-200">{item.title}</p>
-                          <p className="text-[10px] text-slate-400">{item.category}</p>
+                          <p className="font-semibold text-slate-900">{item.title}</p>
+                          <p className="text-[10px] text-slate-500">{item.category}</p>
                         </div>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-500">Jump ↵</span>
+                      <span className="text-[10px] font-mono text-slate-400">Jump ↵</span>
                     </div>
                   );
                 })

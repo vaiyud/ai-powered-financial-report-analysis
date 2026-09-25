@@ -7,14 +7,10 @@ import {
   Sparkles,
   ChevronDown,
   ChevronUp,
-  Mic,
   Play,
-  Pause,
-  RotateCcw,
   Copy,
   Check,
   Headphones,
-  Sliders,
 } from "lucide-react";
 
 interface VoiceSummaryProps {
@@ -58,7 +54,6 @@ export default function VoiceSummary({
 }: VoiceSummaryProps) {
   const [support, setSupport] = useState<boolean>(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const [rate, setRate] = useState<number>(1.0);
   const [showTranscript, setShowTranscript] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -87,7 +82,6 @@ export default function VoiceSummary({
     window.speechSynthesis.cancel();
     detachUtterance();
     setIsSpeaking(false);
-    setIsPaused(false);
   }, [detachUtterance]);
 
   useEffect(() => {
@@ -113,23 +107,16 @@ export default function VoiceSummary({
     utterance.pitch = 1.0;
     utterance.lang = "en-US";
 
-    utterance.onstart = () => {
-      setIsSpeaking(true);
-      setIsPaused(false);
-    };
-
+    utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => {
       setIsSpeaking(false);
-      setIsPaused(false);
       detachUtterance();
     };
-
     utterance.onerror = (e) => {
       if (e.error !== "canceled" && e.error !== "interrupted") {
         console.warn("SpeechSynthesis error:", e.error);
       }
       setIsSpeaking(false);
-      setIsPaused(false);
       detachUtterance();
     };
 
@@ -138,12 +125,10 @@ export default function VoiceSummary({
   }, [spokenText, rate, detachUtterance]);
 
   const togglePlayPause = () => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-
-    if (!isSpeaking) {
-      play();
-    } else {
+    if (isSpeaking) {
       stop();
+    } else {
+      play();
     }
   };
 
@@ -157,70 +142,70 @@ export default function VoiceSummary({
   if (!support) return null;
 
   return (
-    <div className="glass-card rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-4 text-slate-100 shadow-xl">
-      {/* Top Bar with waveform and controls */}
+    <div className="white-card p-4 text-slate-900 shadow-xs border border-slate-200/90 bg-white">
+      {/* Top Controls Row */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/30">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100">
             <Headphones className="h-5 w-5" />
           </div>
 
           <div>
             <div className="flex items-center gap-2">
-              <h4 className="text-sm font-bold text-white tracking-tight">
-                CFO Audio Briefing Studio
+              <h4 className="text-sm font-bold text-slate-900">
+                Audio Executive Briefing
               </h4>
-              <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-mono text-emerald-300 border border-slate-700">
+              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-100">
                 ~30s Digest
               </span>
             </div>
-            <p className="text-xs text-slate-400">
-              Web Speech synthesized briefing of verified financial findings.
+            <p className="text-xs text-slate-500">
+              Listen to AI-synthesized CFO takeaways and key variances.
             </p>
           </div>
         </div>
 
-        {/* Audio Equalizer bars & Playback action */}
+        {/* Audio Waveform Equalizer & Buttons */}
         <div className="flex items-center gap-3">
-          {/* Waveform Equalizer */}
-          <div className="flex items-end gap-1 h-6 px-3 bg-slate-950/60 rounded-lg border border-slate-800/80">
+          {/* Animated Waveform Equalizer */}
+          <div className="flex items-end gap-1 h-6 px-2.5 bg-slate-100 rounded-lg">
             <span
-              className={`w-1 rounded-full bg-emerald-400 transition-all ${
-                isSpeaking ? "animate-sound-bar-1" : "h-2 bg-slate-700"
+              className={`w-1 rounded-full bg-emerald-600 transition-all ${
+                isSpeaking ? "animate-sound-bar-1" : "h-2 bg-slate-300"
               }`}
             />
             <span
-              className={`w-1 rounded-full bg-emerald-400 transition-all ${
-                isSpeaking ? "animate-sound-bar-2" : "h-3 bg-slate-700"
+              className={`w-1 rounded-full bg-emerald-600 transition-all ${
+                isSpeaking ? "animate-sound-bar-2" : "h-3.5 bg-slate-300"
               }`}
             />
             <span
-              className={`w-1 rounded-full bg-emerald-400 transition-all ${
-                isSpeaking ? "animate-sound-bar-3" : "h-1.5 bg-slate-700"
+              className={`w-1 rounded-full bg-emerald-600 transition-all ${
+                isSpeaking ? "animate-sound-bar-3" : "h-1.5 bg-slate-300"
               }`}
             />
             <span
-              className={`w-1 rounded-full bg-emerald-400 transition-all ${
-                isSpeaking ? "animate-sound-bar-4" : "h-3.5 bg-slate-700"
+              className={`w-1 rounded-full bg-emerald-600 transition-all ${
+                isSpeaking ? "animate-sound-bar-4" : "h-3 bg-slate-300"
               }`}
             />
             <span
-              className={`w-1 rounded-full bg-emerald-400 transition-all ${
-                isSpeaking ? "animate-sound-bar-5" : "h-2 bg-slate-700"
+              className={`w-1 rounded-full bg-emerald-600 transition-all ${
+                isSpeaking ? "animate-sound-bar-5" : "h-2 bg-slate-300"
               }`}
             />
           </div>
 
           {/* Speed Selector */}
-          <div className="flex items-center rounded-lg bg-slate-950/80 p-1 border border-slate-800 text-[11px] font-mono">
+          <div className="flex items-center rounded-lg bg-slate-100 p-0.5 text-[11px] font-medium text-slate-600">
             {[1.0, 1.25, 1.5].map((spd) => (
               <button
                 key={spd}
                 onClick={() => setRate(spd)}
-                className={`px-2 py-0.5 rounded transition-colors ${
+                className={`px-2 py-1 rounded transition-colors ${
                   rate === spd
-                    ? "bg-emerald-500 text-slate-950 font-bold"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-white text-slate-900 font-bold shadow-2xs"
+                    : "hover:text-slate-900"
                 }`}
               >
                 {spd}x
@@ -228,66 +213,65 @@ export default function VoiceSummary({
             ))}
           </div>
 
-          {/* Play/Stop Main Button */}
+          {/* Play/Stop Button */}
           <button
             onClick={togglePlayPause}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-md active:scale-95 ${
+            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-xs active:scale-95 ${
               isSpeaking
-                ? "bg-rose-500/20 text-rose-400 border border-rose-500/40 hover:bg-rose-500/30"
-                : "bg-emerald-500 text-slate-950 hover:bg-emerald-400 shadow-emerald-500/20"
+                ? "bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100"
+                : "bg-emerald-600 text-white hover:bg-emerald-700"
             }`}
           >
             {isSpeaking ? (
               <>
                 <Square className="h-3.5 w-3.5 fill-current" />
-                Stop Narration
+                Stop
               </>
             ) : (
               <>
                 <Play className="h-3.5 w-3.5 fill-current" />
-                Play Audio Briefing
+                Play Briefing
               </>
             )}
           </button>
         </div>
       </div>
 
-      {/* Transcript Accordion / Viewer */}
-      <div className="mt-3 border-t border-slate-800/80 pt-2.5">
-        <div className="flex items-center justify-between text-xs text-slate-400">
+      {/* Transcript Accordion */}
+      <div className="mt-3 border-t border-slate-100 pt-2.5">
+        <div className="flex items-center justify-between text-xs text-slate-500">
           <button
             onClick={() => setShowTranscript(!showTranscript)}
-            className="flex items-center gap-1.5 hover:text-slate-200 transition-colors"
+            className="flex items-center gap-1 hover:text-slate-800 transition-colors font-medium"
           >
             {showTranscript ? (
               <ChevronUp className="h-3.5 w-3.5" />
             ) : (
               <ChevronDown className="h-3.5 w-3.5" />
             )}
-            <span>{showTranscript ? "Hide Transcript" : "View Audio Script"}</span>
+            <span>{showTranscript ? "Hide Transcript" : "View Spoken Transcript"}</span>
           </button>
 
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1 hover:text-slate-200 transition-colors text-[11px]"
+            className="flex items-center gap-1 hover:text-slate-800 transition-colors text-[11px]"
           >
             {copied ? (
               <>
-                <Check className="h-3 w-3 text-emerald-400" />
-                <span>Copied</span>
+                <Check className="h-3 w-3 text-emerald-600" />
+                <span className="text-emerald-600 font-semibold">Copied</span>
               </>
             ) : (
               <>
                 <Copy className="h-3 w-3" />
-                <span>Copy Script</span>
+                <span>Copy</span>
               </>
             )}
           </button>
         </div>
 
         {showTranscript && (
-          <div className="mt-2.5 rounded-xl bg-slate-950/80 p-3.5 text-xs leading-relaxed text-slate-300 border border-slate-800/80 font-sans">
-            <span className="text-emerald-400 font-mono font-bold mr-1.5">[Audio Script]:</span>
+          <div className="mt-2.5 rounded-xl bg-slate-50 p-3.5 text-xs leading-relaxed text-slate-700 border border-slate-200">
             {spokenText || "No summary text generated yet."}
           </div>
         )}

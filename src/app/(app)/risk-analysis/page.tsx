@@ -8,12 +8,9 @@ import {
   CheckCircle2,
   Bookmark,
   ExternalLink,
-  ArrowRight,
-  Shield,
+  Send,
   Zap,
   Filter,
-  Send,
-  FileCheck,
 } from "lucide-react";
 
 interface RiskItem {
@@ -32,7 +29,7 @@ interface RiskItem {
 const RISKS_DATA: RiskItem[] = [
   {
     id: "r1",
-    title: "Commercial Paper & Short-Term Debt Facility Spike to $32.8M (4.85% Int.)",
+    title: "Commercial Paper & Short-Term Debt Facility Spike to €32.8M (4.85% Int.)",
     company: "Sanofi S.A.",
     severity: "high",
     impact: "Critical",
@@ -82,7 +79,6 @@ const RISKS_DATA: RiskItem[] = [
 
 export default function RiskAnalysisPage() {
   const [filterSeverity, setFilterSeverity] = useState<string>("all");
-  const [selectedRisk, setSelectedRisk] = useState<RiskItem | null>(null);
   const [escalated, setEscalated] = useState<string | null>(null);
 
   const filteredRisks = RISKS_DATA.filter((r) =>
@@ -95,33 +91,28 @@ export default function RiskAnalysisPage() {
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="rounded-md bg-rose-500/10 px-2.5 py-0.5 text-xs font-mono font-bold text-rose-400 border border-rose-500/30">
-              ADVERSARIAL CRITIC GATEWAY
-            </span>
-          </div>
-          <h2 className="mt-1 text-2xl font-bold tracking-tight text-white">
+          <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
             Risk Severity Matrix & Anomaly Heatmap
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Automated anomaly detection across balance sheets, leverage ratios, and governance notes.
           </p>
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 rounded-xl bg-slate-900 p-1 border border-slate-800 text-xs">
+        <div className="flex items-center gap-1.5 rounded-xl bg-white p-1 border border-slate-200 shadow-2xs text-xs">
           {["all", "high", "medium", "low"].map((sev) => (
             <button
               key={sev}
               onClick={() => setFilterSeverity(sev)}
               className={`rounded-lg px-3 py-1.5 font-semibold capitalize transition-colors ${
                 filterSeverity === sev
-                  ? "bg-emerald-500 text-slate-950 shadow-md"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
               }`}
             >
               {sev === "all" ? "All Risks (4)" : `${sev} (${RISKS_DATA.filter(r => r.severity === sev).length})`}
@@ -130,33 +121,33 @@ export default function RiskAnalysisPage() {
         </div>
       </div>
 
-      {/* Interactive Heatmap Matrix Summary */}
+      {/* Heatmap Matrix Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="glass-card rounded-2xl p-4 border border-rose-500/30 bg-rose-950/20">
+        <div className="white-card p-4 border border-rose-200 bg-rose-50/50 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-rose-400">HIGH IMPACT / CRITICAL</span>
-            <ShieldAlert className="h-4 w-4 text-rose-400" />
+            <span className="text-xs font-bold text-rose-800">HIGH IMPACT / CRITICAL</span>
+            <ShieldAlert className="h-4 w-4 text-rose-600" />
           </div>
-          <p className="mt-2 text-2xl font-bold text-white tabular-nums">1 Detected</p>
-          <p className="text-[11px] text-slate-400 mt-1">Requires Board / CFO Intervention</p>
+          <p className="mt-2 text-2xl font-bold text-slate-900 tabular-nums">1 Detected</p>
+          <p className="text-[11px] text-slate-600 mt-1">Requires Board / CFO Intervention</p>
         </div>
 
-        <div className="glass-card rounded-2xl p-4 border border-amber-500/30 bg-amber-950/20">
+        <div className="white-card p-4 border border-amber-200 bg-amber-50/50 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-400">MODERATE / MONITOR</span>
-            <AlertTriangle className="h-4 w-4 text-amber-400" />
+            <span className="text-xs font-bold text-amber-800">MODERATE / MONITOR</span>
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
           </div>
-          <p className="mt-2 text-2xl font-bold text-white tabular-nums">2 Detected</p>
-          <p className="text-[11px] text-slate-400 mt-1">Cash Flow & Infrastructure</p>
+          <p className="mt-2 text-2xl font-bold text-slate-900 tabular-nums">2 Detected</p>
+          <p className="text-[11px] text-slate-600 mt-1">Cash Flow & Infrastructure</p>
         </div>
 
-        <div className="glass-card rounded-2xl p-4 border border-sky-500/30 bg-sky-950/20">
+        <div className="white-card p-4 border border-slate-200 bg-slate-50 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-sky-400">LOW / MITIGATED</span>
-            <Info className="h-4 w-4 text-sky-400" />
+            <span className="text-xs font-bold text-slate-700">LOW / MITIGATED</span>
+            <Info className="h-4 w-4 text-slate-500" />
           </div>
-          <p className="mt-2 text-2xl font-bold text-white tabular-nums">1 Detected</p>
-          <p className="text-[11px] text-slate-400 mt-1">FX Operational Exposure</p>
+          <p className="mt-2 text-2xl font-bold text-slate-900 tabular-nums">1 Detected</p>
+          <p className="text-[11px] text-slate-600 mt-1">FX Operational Exposure</p>
         </div>
       </div>
 
@@ -169,81 +160,81 @@ export default function RiskAnalysisPage() {
           return (
             <div
               key={risk.id}
-              className={`glass-card rounded-2xl p-5 border transition-all duration-200 ${
+              className={`white-card p-5 border transition-all ${
                 isHigh
-                  ? "border-rose-500/40 bg-slate-900/90 shadow-lg shadow-rose-950/20"
+                  ? "border-rose-200 bg-white shadow-xs"
                   : isMed
-                  ? "border-amber-500/40 bg-slate-900/80"
-                  : "border-slate-800 bg-slate-900/70"
+                  ? "border-amber-200 bg-white shadow-xs"
+                  : "border-slate-200 bg-white shadow-xs"
               }`}
             >
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2.5">
                   <span
-                    className={`rounded-md px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase border ${
+                    className={`rounded-md px-2.5 py-0.5 text-[10px] font-bold uppercase ${
                       isHigh
-                        ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                        ? "bg-rose-100 text-rose-800"
                         : isMed
-                        ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                        : "bg-sky-500/20 text-sky-300 border-sky-500/40"
+                        ? "bg-amber-100 text-amber-800"
+                        : "bg-slate-100 text-slate-700"
                     }`}
                   >
                     {risk.severity} Severity
                   </span>
-                  <span className="text-xs font-bold text-white">{risk.company}</span>
+                  <span className="text-xs font-bold text-slate-900">{risk.company}</span>
                 </div>
 
                 <div className="flex items-center gap-3 text-xs">
-                  <span className="flex items-center gap-1 font-mono text-emerald-400">
+                  <span className="flex items-center gap-1 text-emerald-700 font-semibold">
                     <CheckCircle2 className="h-3.5 w-3.5" />
                     Critic Confidence: {risk.criticConfidence}%
                   </span>
-                  <span className="flex items-center gap-1 text-slate-400 font-mono">
-                    <Bookmark className="h-3.5 w-3.5 text-slate-500" />
+                  <span className="flex items-center gap-1 text-slate-500">
+                    <Bookmark className="h-3.5 w-3.5 text-slate-400" />
                     Page {risk.sourcePage}
                   </span>
                 </div>
               </div>
 
-              <h3 className="mt-3 text-base font-bold text-white tracking-tight">
+              <h3 className="mt-3 text-base font-bold text-slate-900 tracking-tight">
                 {risk.title}
               </h3>
 
               <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                 {/* Root Cause */}
-                <div className="rounded-xl bg-slate-950 p-3.5 border border-slate-800/80">
-                  <p className="font-semibold text-slate-300 flex items-center gap-1.5">
-                    <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
+                <div className="rounded-xl bg-slate-50 p-3.5 border border-slate-200/80">
+                  <p className="font-semibold text-slate-800 flex items-center gap-1.5">
+                    <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
                     Root Cause Diagnosis
                   </p>
-                  <p className="mt-1.5 text-slate-400 leading-relaxed text-[11px]">
+                  <p className="mt-1.5 text-slate-600 leading-relaxed text-[11px]">
                     {risk.rootCause}
                   </p>
                 </div>
 
                 {/* AI Recommended Mitigation */}
-                <div className="rounded-xl bg-slate-950 p-3.5 border border-slate-800/80">
-                  <p className="font-semibold text-slate-300 flex items-center gap-1.5">
-                    <Zap className="h-3.5 w-3.5 text-emerald-400" />
+                <div className="rounded-xl bg-slate-50 p-3.5 border border-slate-200/80">
+                  <p className="font-semibold text-slate-800 flex items-center gap-1.5">
+                    <Zap className="h-3.5 w-3.5 text-emerald-600" />
                     Recommended Mitigation Strategy
                   </p>
-                  <p className="mt-1.5 text-slate-400 leading-relaxed text-[11px]">
+                  <p className="mt-1.5 text-slate-600 leading-relaxed text-[11px]">
                     {risk.mitigation}
                   </p>
                 </div>
               </div>
 
               {/* Action Toolbar */}
-              <div className="mt-4 flex items-center justify-between border-t border-slate-800/60 pt-3 text-xs">
-                <div className="text-[11px] text-slate-500 font-mono">
-                  Impact: <span className="text-slate-300 font-semibold">{risk.impact}</span> • Likelihood: <span className="text-slate-300 font-semibold">{risk.likelihood}</span>
+              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                <div className="text-[11px] text-slate-500 font-medium">
+                  Impact: <strong className="text-slate-800">{risk.impact}</strong> • Likelihood: <strong className="text-slate-800">{risk.likelihood}</strong>
                 </div>
 
                 <button
                   onClick={() => handleEscalate(risk.id)}
-                  className="flex items-center gap-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 transition-colors"
                 >
-                  <Send className="h-3 w-3 text-emerald-400" />
+                  <Send className="h-3 w-3 text-emerald-600" />
                   {escalated === risk.id ? "Escalation Sent to Audit Committe ✓" : "Escalate to Board Memo"}
                 </button>
               </div>

@@ -14,16 +14,14 @@ import {
 } from "recharts";
 import {
   TrendingUp,
-  TrendingDown,
   FileText,
   Bookmark,
   CheckCircle2,
   ExternalLink,
   ShieldCheck,
   Search,
-  Maximize2,
-  AlertTriangle,
   ArrowUpRight,
+  Sparkles,
 } from "lucide-react";
 
 interface MetricItem {
@@ -38,7 +36,6 @@ interface MetricItem {
     page: number;
     section: string;
     rawExcerpt: string;
-    mcpSignature: string;
   };
 }
 
@@ -55,7 +52,6 @@ const METRICS_DATA: MetricItem[] = [
       page: 12,
       section: "Consolidated Statement of Profit and Loss",
       rawExcerpt: "Net sales for the first quarter of 2026 reached €10,509 million, representing an increase of 6.2% at constant exchange rates, driven primarily by Dupixent (+24.9%).",
-      mcpSignature: "SHA256-P12-VERIFIED",
     },
   },
   {
@@ -70,7 +66,6 @@ const METRICS_DATA: MetricItem[] = [
       page: 13,
       section: "Segment Operating Performance",
       rawExcerpt: "Gross margin stood at 77.2% of net sales compared to 77.7% in Q1 prior year, reflecting manufacturing efficiencies offset by product mix shifts.",
-      mcpSignature: "SHA256-P13-VERIFIED",
     },
   },
   {
@@ -85,7 +80,6 @@ const METRICS_DATA: MetricItem[] = [
       page: 28,
       section: "Financial Review & Market Data",
       rawExcerpt: "Operating revenue rose 8.2% to RM 920.4 million, supported by average daily trading value (ADV) of RM 3.12 billion against RM 2.88 billion in the prior period.",
-      mcpSignature: "SHA256-P28-VERIFIED",
     },
   },
   {
@@ -100,7 +94,6 @@ const METRICS_DATA: MetricItem[] = [
       page: 15,
       section: "Notes to Condensed Consolidated Financial Statements: Note 8.2",
       rawExcerpt: "Drawdowns under commercial paper and short-term revolving facilities totaled €32.8 million at an effective floating interest rate of 4.85% per annum.",
-      mcpSignature: "SHA256-P15-FLAGGED-LEVERAGE",
     },
   },
 ];
@@ -117,20 +110,20 @@ export default function FinancialInsightsPage() {
   const [selectedMetric, setSelectedMetric] = useState<MetricItem>(METRICS_DATA[0]);
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Page Header */}
+    <div className="space-y-6 pb-12 max-w-7xl mx-auto">
+      {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">
-            Split-Screen Provenance Studio
+          <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            Financial Insights & Provenance Studio
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Interactive AI analytics synchronized with cited source PDF disclosure pages.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+          <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-100 flex items-center gap-1.5">
             <ShieldCheck className="h-3.5 w-3.5" />
             100% Deterministic Extraction
           </span>
@@ -142,46 +135,44 @@ export default function FinancialInsightsPage() {
         {/* Left 7 Cols: Analytics & Metric Cards */}
         <div className="lg:col-span-7 space-y-6">
           {/* Revenue Trend Chart */}
-          <div className="glass-card rounded-2xl p-5 border border-slate-800 bg-slate-900/80">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="white-card p-5 bg-white border border-slate-200/90 shadow-xs">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <h3 className="text-sm font-bold text-white tracking-tight">
-                  Revenue & Operating Trajectory (€ Millions)
+                <h3 className="text-sm font-bold text-slate-900">
+                  Revenue & Operating Expenses Trajectory (€ Millions)
                 </h3>
-                <p className="text-[11px] text-slate-400">5-Quarter historical multi-source comparison</p>
+                <p className="text-xs text-slate-500">5-Quarter comparative performance</p>
               </div>
-              <span className="text-[10px] font-mono text-emerald-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
-                L2 Verified
-              </span>
             </div>
 
-            <div className="mt-4 h-64 w-full">
+            <div className="mt-4 h-60 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={CHART_SERIES} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                    <linearGradient id="colorSalesLight" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#059669" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#059669" stopOpacity={0.0} />
                     </linearGradient>
-                    <linearGradient id="colorOpex" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.0} />
+                    <linearGradient id="colorOpexLight" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                  <XAxis dataKey="quarter" stroke="#64748b" fontSize={11} tickLine={false} />
-                  <YAxis stroke="#64748b" fontSize={11} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="quarter" stroke="#94a3b8" fontSize={11} tickLine={false} />
+                  <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#0f172a",
-                      borderColor: "#334155",
+                      backgroundColor: "#ffffff",
+                      borderColor: "#e2e8f0",
                       borderRadius: "0.75rem",
                       fontSize: "12px",
-                      color: "#f8fafc",
+                      color: "#0f172a",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                     }}
                   />
-                  <Area type="monotone" dataKey="sanofiSales" name="Sanofi Sales" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorSales)" />
-                  <Area type="monotone" dataKey="opex" name="Operating Exp" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorOpex)" />
+                  <Area type="monotone" dataKey="sanofiSales" name="Sanofi Sales (€M)" stroke="#059669" strokeWidth={2} fillOpacity={1} fill="url(#colorSalesLight)" />
+                  <Area type="monotone" dataKey="opex" name="Operating Exp (€M)" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#colorOpexLight)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -189,7 +180,7 @@ export default function FinancialInsightsPage() {
 
           {/* Interactive Metric Cards */}
           <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
               Extracted Line Items (Click to synchronize PDF preview)
             </h3>
 
@@ -201,25 +192,25 @@ export default function FinancialInsightsPage() {
                   onClick={() => setSelectedMetric(metric)}
                   className={`cursor-pointer rounded-2xl p-4 transition-all duration-200 border ${
                     isSelected
-                      ? "bg-slate-800/90 border-emerald-500/50 shadow-lg shadow-emerald-500/10 ring-1 ring-emerald-500/30"
-                      : "bg-slate-900/60 border-slate-800/80 hover:bg-slate-800/50 hover:border-slate-700"
+                      ? "bg-emerald-50/40 border-emerald-300 shadow-xs ring-1 ring-emerald-200"
+                      : "bg-white border-slate-200/90 hover:bg-slate-50/80 shadow-xs"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="rounded bg-slate-950 px-2 py-0.5 text-[10px] font-mono font-bold text-slate-300 border border-slate-800">
+                      <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700">
                         {metric.ticker}
                       </span>
-                      <h4 className="text-sm font-bold text-white tracking-tight">
+                      <h4 className="text-sm font-bold text-slate-900">
                         {metric.label}
                       </h4>
                     </div>
 
                     <span
-                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold ${
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${
                         metric.changePct > 50
-                          ? "bg-rose-500/10 text-rose-400 border border-rose-500/30"
-                          : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                          ? "bg-rose-50 text-rose-700 border border-rose-200"
+                          : "bg-emerald-50 text-emerald-700 border border-emerald-200"
                       }`}
                     >
                       <ArrowUpRight className="h-3 w-3" />
@@ -227,9 +218,9 @@ export default function FinancialInsightsPage() {
                     </span>
                   </div>
 
-                  <div className="mt-3 flex items-baseline justify-between border-t border-slate-800/60 pt-2.5 text-xs">
+                  <div className="mt-3 flex items-baseline justify-between border-t border-slate-100 pt-2.5 text-xs">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-xl font-bold text-white tabular-nums">
+                      <span className="text-xl font-bold text-slate-900 tabular-nums">
                         {metric.currentValue}
                       </span>
                       <span className="text-xs text-slate-400 line-through">
@@ -237,8 +228,8 @@ export default function FinancialInsightsPage() {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[11px]">
-                      <Bookmark className="h-3.5 w-3.5 text-emerald-400" />
+                    <div className="flex items-center gap-1.5 text-slate-500 text-[11px] font-medium">
+                      <Bookmark className="h-3.5 w-3.5 text-emerald-600" />
                       <span>Page {metric.provenance.page}</span>
                     </div>
                   </div>
@@ -249,56 +240,56 @@ export default function FinancialInsightsPage() {
         </div>
 
         {/* Right 5 Cols: Synchronized Document Provenance Inspector */}
-        <div className="lg:col-span-5 sticky top-20 glass-card rounded-2xl p-5 border border-slate-800 bg-slate-900/90 shadow-2xl">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="lg:col-span-5 sticky top-20 white-card p-5 bg-white border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-emerald-400" />
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+              <FileText className="h-4 w-4 text-emerald-600" />
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                 Source Document Inspector
               </h3>
             </div>
-            <span className="rounded bg-emerald-500/10 px-2 py-0.5 text-[10px] font-mono text-emerald-400 border border-emerald-500/30">
-              {selectedMetric.provenance.mcpSignature}
+            <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-100">
+              Verified Citation
             </span>
           </div>
 
           {/* Document Header Metadata */}
-          <div className="mt-4 rounded-xl bg-slate-950 p-3.5 border border-slate-800">
-            <p className="text-[11px] font-mono text-slate-400 truncate">
+          <div className="mt-4 rounded-xl bg-slate-50 p-3.5 border border-slate-200/80">
+            <p className="text-[11px] font-medium text-slate-600 truncate">
               📄 {selectedMetric.provenance.documentName}
             </p>
             <div className="mt-2 flex items-center justify-between text-xs">
-              <span className="font-semibold text-slate-200">
-                Cited Page: <span className="text-emerald-400 font-mono font-bold">{selectedMetric.provenance.page}</span>
+              <span className="font-semibold text-slate-800">
+                Cited Page: <span className="text-emerald-700 font-bold">{selectedMetric.provenance.page}</span>
               </span>
-              <span className="text-slate-400 text-[11px] truncate max-w-[170px]">
+              <span className="text-slate-500 text-[11px] truncate max-w-[170px]">
                 {selectedMetric.provenance.section}
               </span>
             </div>
           </div>
 
           {/* Simulated PDF Bounding Box Highlight Canvas */}
-          <div className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 relative overflow-hidden shadow-inner">
-            <div className="flex items-center justify-between text-[11px] font-mono text-emerald-400 mb-2">
-              <span>[PROVENANCE_BOUNDING_BOX_PAGE_{selectedMetric.provenance.page}]</span>
-              <CheckCircle2 className="h-3.5 w-3.5" />
+          <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 relative overflow-hidden">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-emerald-800 mb-2">
+              <span>[PROVENANCE EXCERPT • PAGE {selectedMetric.provenance.page}]</span>
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
             </div>
 
-            <p className="text-xs leading-relaxed text-slate-200 font-serif italic bg-slate-950/60 p-3 rounded-lg border border-emerald-500/20">
+            <p className="text-xs leading-relaxed text-slate-800 font-serif italic bg-white p-3 rounded-lg border border-emerald-100 shadow-2xs">
               "{selectedMetric.provenance.rawExcerpt}"
             </p>
 
-            <div className="mt-3 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-              <span>Critic Match: 98.4% Confidence</span>
-              <span className="text-emerald-400">FAISS Cosine Similarity: 0.94</span>
+            <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500 font-medium">
+              <span>Critic Confidence: 98.4%</span>
+              <span className="text-emerald-700">Cosine Similarity: 0.94</span>
             </div>
           </div>
 
-          {/* Adversarial Verification Stamp */}
-          <div className="mt-4 rounded-xl bg-slate-950/80 p-3 border border-slate-800 text-xs flex items-center gap-2.5 text-slate-300">
-            <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
+          {/* Verification Badge */}
+          <div className="mt-4 rounded-xl bg-slate-50 p-3 border border-slate-200/80 text-xs flex items-center gap-2.5 text-slate-600">
+            <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
             <p className="text-[11px] leading-tight">
-              Deterministic verification confirmed no LLM arithmetic modification between source disclosure table and calculated output.
+              Deterministic verification confirmed exact match between audited disclosure and calculated metric.
             </p>
           </div>
         </div>
