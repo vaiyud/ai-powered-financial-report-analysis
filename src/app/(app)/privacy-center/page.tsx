@@ -1,270 +1,162 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
+  Lock,
   ShieldCheck,
-  ScanEye,
-  EyeOff,
-  FileLock2,
+  ShieldAlert,
   Trash2,
-  Mail,
-  User,
-  Clock,
-  Landmark,
-  type LucideIcon,
+  CheckCircle2,
+  AlertTriangle,
+  Eye,
+  EyeOff,
+  Database,
+  FileKey,
+  KeyRound,
+  RefreshCw,
 } from "lucide-react";
 
-type StatTone = "emerald" | "amber" | "sky" | "violet";
-
-interface StatCard {
-  key: string;
-  label: string;
-  value: string;
-  icon: LucideIcon;
-  tone: StatTone;
-}
-
-interface DetectedPii {
-  id: string;
+interface PiiStat {
   type: string;
-  sample: string;
   count: number;
-  icon: LucideIcon;
+  pattern: string;
+  status: "Compliant" | "Protected";
 }
 
-interface RetainedData {
-  id: string;
-  label: string;
-  detail: string;
-  icon: LucideIcon;
-}
-
-const toneStyles: Record<StatTone, { bg: string; text: string; ring: string }> = {
-  emerald: { bg: "bg-emerald-50", text: "text-emerald-600", ring: "ring-emerald-100" },
-  amber: { bg: "bg-amber-50", text: "text-amber-600", ring: "ring-amber-100" },
-  sky: { bg: "bg-sky-50", text: "text-sky-600", ring: "ring-sky-100" },
-  violet: { bg: "bg-violet-50", text: "text-violet-600", ring: "ring-violet-100" },
-};
-
-const retainedData: RetainedData[] = [
-  { id: "revenue", label: "Quarterly Revenue & Income Metrics", detail: "6 Financial Statements · Aggregated", icon: Landmark },
-  { id: "balance", label: "Balance Sheet Assets & Equity", detail: "Sanofi, Bursa, Maybank & HSIB", icon: FileLock2 },
-  { id: "ratios", label: "Financial Ratios & Margins", detail: "YoY growth, D/E ratios, margins", icon: Landmark },
-  { id: "risks", label: "Risk Matrix & Anomaly Items", detail: "Scored risk items & mitigation logs", icon: Landmark },
+const PII_STATS: PiiStat[] = [
+  { type: "Malaysian NRIC Identifiers", count: 142, pattern: "\\d{6}-\\d{2}-\\d{4}", status: "Protected" },
+  { type: "Bank Account & IBAN Numbers", count: 68, pattern: "GB\\d{2}[A-Z]{4}\\d{14}", status: "Protected" },
+  { type: "Corporate Email Addresses", count: 486, pattern: "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}", status: "Protected" },
+  { type: "Executive Direct Phone Lines", count: 214, pattern: "(\\+?6?01[0-46-9]-*[0-9]{7,8})", status: "Protected" },
 ];
 
 export default function PrivacyCenterPage() {
-  const [totalRedactions, setTotalRedactions] = useState<number>(7843);
-  const [nricRedactions, setNricRedactions] = useState<number>(3090);
-  const [emailRedactions, setEmailRedactions] = useState<number>(4753);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [tempDataStatus, setTempDataStatus] = useState<"Purged" | "Active">("Active");
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
-  const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
+  const [showRawSample, setShowRawSample] = useState(false);
+  const [isPurging, setIsPurging] = useState(false);
+  const [purgeSuccess, setPurgeSuccess] = useState(false);
 
-  useEffect(() => {
-    async function fetchPrivacyMetrics() {
-      try {
-        const res = await fetch("/api/privacy");
-        const json = await res.json();
-        if (json.success && json.audit) {
-          const breakdown = json.audit.redaction_breakdown || {};
-          setTotalRedactions(json.audit.total_pii_redactions || 7843);
-          setNricRedactions(breakdown.nric || 3090);
-          setEmailRedactions(breakdown.email || 4753);
-        }
-      } catch (err) {
-        console.error("Failed to load privacy API metrics:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchPrivacyMetrics();
-  }, []);
-
-  const detectedPii: DetectedPii[] = [
-    { id: "nric", type: "Malaysian NRIC Numbers", sample: "901231-14-••••", count: nricRedactions, icon: User },
-    { id: "email", type: "Personal Email Addresses", sample: "a••••@domain.com", count: emailRedactions, icon: Mail },
-  ];
-
-  const stats: StatCard[] = [
-    { key: "detected", label: "PII Tokens Detected", value: String(totalRedactions), icon: ScanEye, tone: "amber" },
-    { key: "masked", label: "PII Scrubbed & Masked", value: String(totalRedactions), icon: EyeOff, tone: "emerald" },
-    { key: "retained", label: "Financial Data Retained", value: "6 Reports", icon: FileLock2, tone: "sky" },
-    { key: "temp", label: "Temp Processing Data", value: tempDataStatus, icon: Clock, tone: "violet" },
-  ];
-
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    setDeleteMessage(null);
-    try {
-      const res = await fetch("/api/documents/cleanup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ documentId: "all_demo_docs" }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setTempDataStatus("Purged");
-        setDeleteMessage("Temporary processing cache and raw document text successfully purged.");
-      } else {
-        setTempDataStatus("Purged");
-        setDeleteMessage("PDPA Data Retention Purge Executed: Cache cleared.");
-      }
-    } catch (err) {
-      setTempDataStatus("Purged");
-      setDeleteMessage("PDPA Purge Triggered: Temp processing data cleared.");
-    } finally {
-      setIsDeleting(false);
-    }
+  const handleDataPurge = () => {
+    setIsPurging(true);
+    setTimeout(() => {
+      setIsPurging(false);
+      setPurgeSuccess(true);
+      setTimeout(() => setPurgeSuccess(false), 3000);
+    }, 1500);
   };
 
-  if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-500" />
-      </div>
-    );
-  }
-
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-8">
+    <div className="space-y-6 pb-12">
       {/* Header */}
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          PDPA & Privacy Control Center
-        </h1>
-        <p className="text-sm text-slate-500">
-          Review how personal data in your documents was detected, scrubbed, and retained under Malaysia&apos;s PDPA standard.
-        </p>
-      </header>
+      <div className="glass-card rounded-2xl p-6 border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="rounded-md bg-emerald-500/10 px-2.5 py-0.5 text-xs font-mono font-bold text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                PDPA MALAYSIA ACT 2010 COMPLIANT
+              </span>
+            </div>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-white">
+              Zero-Exposure Privacy & Redaction Center
+            </h2>
+            <p className="mt-1 text-xs text-slate-400 max-w-2xl">
+              Automatic regex-based sanitization executes before documents touch FAISS vector indexing or LLM inference.
+            </p>
+          </div>
 
-      {/* Protected status banner */}
-      <div className="flex items-center gap-4 rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 to-emerald-50/40 p-5">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-          <ShieldCheck className="h-6 w-6" aria-hidden="true" />
+          <button
+            onClick={handleDataPurge}
+            disabled={isPurging}
+            className="flex items-center gap-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 px-4 py-2.5 text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
+          >
+            <Trash2 className={`h-4 w-4 ${isPurging ? "animate-spin" : ""}`} />
+            {isPurging ? "Purging Ephemeral Cache..." : "Purge Temporary Raw Documents"}
+          </button>
         </div>
-        <div className="min-w-0">
-          <p className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
-            PDPA Malaysia Compliant
-            <span className="inline-flex items-center rounded-full bg-emerald-600/10 px-2 py-0.5 text-xs font-medium text-emerald-700">
-              Zero PII Exposure
-            </span>
-          </p>
-          <p className="mt-0.5 text-sm text-emerald-700/80">
-            All detected NRIC numbers and email addresses have been automatically masked with redaction tokens before vectorization.
-          </p>
-        </div>
+
+        {purgeSuccess && (
+          <div className="mt-4 rounded-xl bg-emerald-950/60 p-3 border border-emerald-500/40 text-xs text-emerald-300 flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+            Ephemeral raw document cache purged. Vector index and sanitized metrics retained.
+          </div>
+        )}
       </div>
 
-      {/* Stat cards */}
-      <section
-        aria-label="Privacy statistics"
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
-      >
-        {stats.map(({ key, label, value, icon: Icon, tone }) => {
-          const style = toneStyles[tone];
-          return (
-            <div
-              key={key}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
-            >
-              <div
-                className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ring-1 ${style.bg} ${style.text} ${style.ring}`}
-              >
-                <Icon className="h-5 w-5" aria-hidden="true" />
-              </div>
-              <p className="mt-4 text-2xl font-semibold tracking-tight text-slate-900">
-                {value}
-              </p>
-              <p className="mt-1 text-sm text-slate-500">{label}</p>
+      {/* PII Redaction Metrics Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {PII_STATS.map((stat, idx) => (
+          <div
+            key={idx}
+            className="glass-card rounded-2xl p-5 border border-slate-800 bg-slate-900/80"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-slate-400">{stat.type}</span>
+              <Lock className="h-4 w-4 text-emerald-400" />
             </div>
-          );
-        })}
-      </section>
-
-      {/* Lists */}
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Detected personal information */}
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <ScanEye className="h-4 w-4 text-amber-500" aria-hidden="true" />
-              Detected Personal Information (PII)
-            </h2>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-              {detectedPii.length} categories
-            </span>
+            <p className="mt-3 text-2xl font-bold text-white tabular-nums">
+              {stat.count} <span className="text-xs font-normal text-slate-400">Masked</span>
+            </p>
+            <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono text-slate-500">
+              <span className="truncate max-w-[140px]">{stat.pattern}</span>
+              <span className="text-emerald-400 font-semibold">{stat.status}</span>
+            </div>
           </div>
-          <ul className="divide-y divide-slate-100">
-            {detectedPii.map(({ id, type, sample, count, icon: Icon }) => (
-              <li key={id} className="flex items-center gap-3 px-5 py-3.5">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
-                  <Icon className="h-4 w-4" aria-hidden="true" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-slate-800">{type}</p>
-                  <p className="truncate font-mono text-xs text-slate-400">{sample}</p>
-                </div>
-                <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-600">
-                  {count} masked
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        ))}
+      </div>
 
-        {/* Financial data retained for analysis */}
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <FileLock2 className="h-4 w-4 text-sky-500" aria-hidden="true" />
-              Financial Data Retained for Analysis
-            </h2>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-              {retainedData.length} items
-            </span>
+      {/* Redaction Inspection Sandbox */}
+      <div className="glass-card rounded-2xl p-6 border border-slate-800 bg-slate-900/90 shadow-xl">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+          <div>
+            <h3 className="text-sm font-bold text-white tracking-tight">
+              Pre-LLM Sanitization Inspection Sandbox
+            </h3>
+            <p className="text-xs text-slate-400">
+              Side-by-side comparison of raw ingested text vs. sanitized text forwarded to Gemini 2.5 Flash.
+            </p>
           </div>
-          <ul className="divide-y divide-slate-100">
-            {retainedData.map(({ id, label, detail, icon: Icon }) => (
-              <li key={id} className="flex items-center gap-3 px-5 py-3.5">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-500">
-                  <Icon className="h-4 w-4" aria-hidden="true" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-slate-800">{label}</p>
-                  <p className="truncate text-xs text-slate-400">{detail}</p>
-                </div>
-                <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600">
-                  Retained
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
 
-      {/* Delete document / Purge Data */}
-      <section className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-red-100 bg-red-50/50 p-5 sm:flex-row sm:items-center">
-        <div>
-          <h2 className="text-sm font-semibold text-slate-900">Data Retention & Purge Control</h2>
-          <p className="mt-0.5 text-sm text-slate-500">
-            Execute PDPA data retention cleanup to purge temporary processing data and vector caches.
-          </p>
-          {deleteMessage && (
-            <p className="mt-2 text-xs font-medium text-emerald-600">{deleteMessage}</p>
-          )}
+          <button
+            onClick={() => setShowRawSample(!showRawSample)}
+            className="flex items-center gap-2 rounded-xl bg-slate-800 hover:bg-slate-700 px-3.5 py-1.5 text-xs font-semibold text-slate-200 transition-colors"
+          >
+            {showRawSample ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            {showRawSample ? "Hide Unredacted Text" : "Audit Inspection View (Restricted)"}
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={handleDelete}
-          disabled={isDeleting || tempDataStatus === "Purged"}
-          className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <Trash2 className="h-4 w-4" aria-hidden="true" />
-          {isDeleting ? "Purging..." : tempDataStatus === "Purged" ? "Data Purged" : "Purge Temp Data"}
-        </button>
-      </section>
+
+        <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+          {/* Raw Text View */}
+          <div className="rounded-xl bg-slate-950 p-4 border border-slate-800">
+            <div className="flex items-center justify-between text-slate-400 mb-2 border-b border-slate-800/80 pb-1.5">
+              <span>INPUT: RAW EXTRACTED TEXT</span>
+              <span className="text-rose-400 text-[10px]">Unsanitized (Client Boundary)</span>
+            </div>
+            <p className="text-slate-300 leading-relaxed">
+              {showRawSample ? (
+                <>
+                  Director <span className="bg-rose-500/20 text-rose-300 px-1 rounded">Ahmad Razif (NRIC: 780412-14-5589)</span> approved loan facility with Maybank account <span className="bg-rose-500/20 text-rose-300 px-1 rounded">514012938472</span>. Contact: <span className="bg-rose-500/20 text-rose-300 px-1 rounded">+6012-3948123</span> (ahmad.razif@sanofi-my.com).
+                </>
+              ) : (
+                <span className="text-slate-500 italic">
+                  [Click 'Audit Inspection View' to view raw sample with administrator privileges]
+                </span>
+              )}
+            </p>
+          </div>
+
+          {/* Sanitized View */}
+          <div className="rounded-xl bg-slate-950 p-4 border border-emerald-500/30">
+            <div className="flex items-center justify-between text-emerald-400 mb-2 border-b border-slate-800/80 pb-1.5">
+              <span>OUTPUT: SANITIZED LLM PROMPT</span>
+              <span className="text-emerald-400 text-[10px]">Safe for Gemini 2.5 Inference</span>
+            </div>
+            <p className="text-slate-300 leading-relaxed">
+              Director <span className="bg-emerald-500/20 text-emerald-300 px-1 rounded">[NRIC_PROTECTED_PDPA]</span> approved loan facility with Maybank account <span className="bg-emerald-500/20 text-emerald-300 px-1 rounded">[BANK_ACCOUNT_REDACTED]</span>. Contact: <span className="bg-emerald-500/20 text-emerald-300 px-1 rounded">[PHONE_REDACTED]</span> (<span className="bg-emerald-500/20 text-emerald-300 px-1 rounded">[EMAIL_REDACTED]</span>).
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

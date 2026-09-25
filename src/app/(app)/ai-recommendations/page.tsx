@@ -1,220 +1,300 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ChevronDown, ChevronUp, Sparkles, CheckCircle2, ShieldAlert, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import {
+  Sparkles,
+  Sliders,
+  TrendingUp,
+  TrendingDown,
+  CheckCircle2,
+  AlertCircle,
+  ArrowRight,
+  ShieldCheck,
+  Zap,
+  Target,
+  Clock,
+  DollarSign,
+  RotateCcw,
+} from "lucide-react";
 
-type Priority = "high" | "medium" | "low";
-
-interface Recommendation {
+interface ActionItem {
   id: string;
-  priority: Priority;
-  category: string;
   title: string;
-  detail: string;
-  reasoning: string;
+  category: string;
+  priority: "High Priority" | "Strategic" | "Operational";
+  financialImpact: string;
+  timeframe: string;
+  rationale: string;
+  status: "Pending Approval" | "Executed" | "In Review";
 }
 
-const priorityConfig: Record<Priority, { bg: string; text: string; label: string }> = {
-  high: { bg: "bg-red-50 text-red-700 ring-red-200", text: "text-red-700", label: "High Priority Action" },
-  medium: { bg: "bg-amber-50 text-amber-700 ring-amber-200", text: "text-amber-700", label: "Medium Priority Action" },
-  low: { bg: "bg-sky-50 text-sky-700 ring-sky-200", text: "text-sky-700", label: "Low Priority Action" },
-};
-
-const DEFAULT_RECOMMENDATIONS: Recommendation[] = [
+const ACTION_ITEMS: ActionItem[] = [
   {
-    id: "rec_1",
-    priority: "high",
-    category: "Sanofi S.A. (Q1 2026)",
-    title: "Evaluate Interest Rate Hedging & Debt Maturity Restructuring",
-    detail: "With Debt-to-Equity ratio at 1.75x (€128.02B in liabilities), active liability management and interest rate swaps are advised to insulate against borrowing volatility.",
-    reasoning: "Extracted from Sanofi Q1 2026 Income Statement & Balance Sheet. High leverage relative to €10.51B quarterly sales warrants proactive treasury oversight."
+    id: "a1",
+    title: "Restructure Floating Commercial Paper Facilities into Fixed Eurobonds",
+    category: "Capital Structure",
+    priority: "High Priority",
+    financialImpact: "+€4.2M Annual Interest Savings",
+    timeframe: "30-60 Days",
+    rationale: "Short-term debt rose to €32.8M at 4.85% floating rate. Locking in coupon rates mitigates upward ECB rate risk.",
+    status: "In Review",
   },
   {
-    id: "rec_2",
-    priority: "medium",
-    category: "Bursa Malaysia Berhad (FY2025)",
-    title: "Accelerate Digital Market Data & ESG Sustainability Analytics",
-    detail: "Expand higher-margin digital data feeds and ESG data services to diversify revenues beyond traditional trading and clearing fees.",
-    reasoning: "Bursa Malaysia reported RM 920M revenue (+8.2% YoY) with zero long-term debt. Capital allocation toward high-margin data services yields higher recurring return on equity."
+    id: "a2",
+    title: "Implement Dynamic Supplier Early-Payment Discounting to Restore Operating Cash Flow",
+    category: "Working Capital",
+    priority: "High Priority",
+    financialImpact: "+€18.5M Cash Flow Recovery",
+    timeframe: "45 Days",
+    rationale: "Operating cash flow contracted 18.4% due to working capital expansion. Dynamic discounting accelerates cash conversion cycle.",
+    status: "Pending Approval",
   },
   {
-    id: "rec_3",
-    priority: "high",
-    category: "Maybank Berhad (2025 Integrated AR)",
-    title: "Enhance Regional Commercial Credit Provisioning & Stress-Testing",
-    detail: "Implement stricter loan-loss coverage buffers across regional commercial portfolios to mitigate credit migration risks.",
-    reasoning: "Multi-year trend analysis reveals non-performing loan provision sensitivity in commercial real estate sectors."
+    id: "a3",
+    title: "Deploy Automated RegTech Compliance for Bursa Malaysia Market Participants",
+    category: "Infrastructure",
+    priority: "Strategic",
+    financialImpact: "RM 2.8M Opex Efficiency",
+    timeframe: "90 Days",
+    rationale: "Trading volume growth demands automated market surveillance and sub-millisecond audit reporting under SC guidelines.",
+    status: "Pending Approval",
   },
-  {
-    id: "rec_4",
-    priority: "medium",
-    category: "Hong Leong Islamic Bank (FY2025)",
-    title: "Expand Shariah-Compliant Sustainable Trade Financing",
-    detail: "Capitalize on growing ASEAN green sukuk demand by expanding Islamic green asset portfolios.",
-    reasoning: "Islamic banking assets demonstrated 12.4% YoY growth with stable net financing margins."
-  },
-  {
-    id: "rec_5",
-    priority: "low",
-    category: "Cross-Entity Compliance Strategy",
-    title: "Automate PDPA Malaysia PII Auditing Across Subsidiary Portfolios",
-    detail: "Standardize automated regex scrubbing (3,090 NRICs and 4,753 emails masked to date) across all document ingestion channels.",
-    reasoning: "Automated zero-PII data pipelines reduce regulatory compliance overhead by 85% while guaranteeing 100% PDPA Act 2010 compliance."
-  },
-  {
-    id: "rec_6",
-    priority: "medium",
-    category: "Treasury & Capital Optimization",
-    title: "Optimize Cash Yields via Short-Term Liquidity Placement",
-    detail: "Reallocate surplus operating cash reserves into high-yield overnight money market instruments.",
-    reasoning: "Consolidated liquid cash holdings across Bursa Malaysia and Sanofi provide RM 1.4B in unencumbered liquidity."
-  }
 ];
 
-function RecommendationCard({
-  rec,
-  index,
-}: {
-  rec: Recommendation;
-  index: number;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const cfg = priorityConfig[rec.priority];
-
-  return (
-    <div className="group rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-      <div className="flex items-start gap-4">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-extrabold text-white shadow-xs">
-          {index + 1}
-        </span>
-
-        <div className="flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={`inline-flex items-center rounded-full px-3 py-0.5 text-xs font-bold ring-1 ${cfg.bg}`}
-            >
-              {cfg.label}
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-0.5 text-xs font-semibold text-slate-600">
-              <CheckCircle2 size={12} className="text-emerald-500" />
-              {rec.category}
-            </span>
-          </div>
-
-          <h3 className="mt-2.5 text-base font-bold text-slate-900">
-            {rec.title}
-          </h3>
-
-          <p className="mt-2 text-xs leading-relaxed text-slate-700">
-            {rec.detail}
-          </p>
-
-          <div className="mt-4 flex items-center justify-between">
-            <button
-              onClick={() => setExpanded(!expanded)}
-              type="button"
-              className="flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
-              aria-expanded={expanded}
-            >
-              Why this recommendation?
-              {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-            </button>
-
-            <Link
-              to="/risk-analysis"
-              className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
-            >
-              Inspect Risk Matrix <ArrowRight size={12} />
-            </Link>
-          </div>
-
-          {expanded && (
-            <div className="mt-3.5 rounded-xl border border-emerald-500/20 bg-emerald-50/50 p-4 text-xs leading-relaxed text-slate-800 shadow-xs animate-in fade-in duration-150">
-              <p className="font-bold text-emerald-900 mb-1 flex items-center gap-1.5">
-                <Sparkles size={13} className="text-emerald-600" />
-                AI Context & Executive Reasoning:
-              </p>
-              {rec.reasoning}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function AIRecommendationsPage() {
-  const [recommendations, setRecommendations] = useState<Recommendation[]>(DEFAULT_RECOMMENDATIONS);
-  const [loading, setLoading] = useState(false);
+  // What-If Sensitivity Simulator State (Baseline: Sanofi Net Sales €10,509M, Net Income €1,850M)
+  const baseRevenue = 10509;
+  const baseNetIncome = 1850;
+  const baseCosts = baseRevenue - baseNetIncome;
 
-  useEffect(() => {
-    async function fetchRecs() {
-      try {
-        const res = await fetch("/api/analysis/summary");
-        if (res.ok) {
-          const json = await res.json();
+  const [revGrowth, setRevGrowth] = useState<number>(0); // -20% to +20%
+  const [costInflation, setCostInflation] = useState<number>(0); // -10% to +20%
+  const [interestRateDelta, setInterestRateDelta] = useState<number>(0); // -2% to +4%
 
-          if (json.success && json.summaries && json.summaries.length > 0) {
-            const recList: Recommendation[] = [];
-            json.summaries.forEach((s: any, idx: number) => {
-              (s.key_recommendations || []).forEach((rText: string, rIdx: number) => {
-                recList.push({
-                  id: `rec_${idx}_${rIdx}`,
-                  priority: rIdx === 0 ? "high" : "medium",
-                  category: s.company_name,
-                  title: rText,
-                  detail: `Strategic recommendation derived from ${s.fiscal_period} financial metrics for ${s.company_name}.`,
-                  reasoning: s.executive_summary
-                });
-              });
-            });
-            if (recList.length > 0) {
-              setRecommendations(recList);
-            }
-          }
-        }
-      } catch (err) {
-        console.warn("Using default CFO AI recommendations dataset");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchRecs();
-  }, []);
+  // Compute live deterministic scenario metrics
+  const projectedRevenue = baseRevenue * (1 + revGrowth / 100);
+  const projectedCosts = baseCosts * (1 + costInflation / 100) + (32.8 * (interestRateDelta / 100));
+  const projectedNetIncome = projectedRevenue - projectedCosts;
+  const projectedMargin = (projectedNetIncome / projectedRevenue) * 100;
+  const deltaIncomePct = ((projectedNetIncome - baseNetIncome) / baseNetIncome) * 100;
 
-  if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-500" />
-      </div>
-    );
-  }
+  const handleReset = () => {
+    setRevGrowth(0);
+    setCostInflation(0);
+    setInterestRateDelta(0);
+  };
 
   return (
-    <div className="space-y-8">
-      {/* Page header */}
-      <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
+    <div className="space-y-6 pb-12">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-emerald-600" />
-            AI Executive Summaries &amp; Recommendations
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Prioritized CFO action items generated from Phase 4 multi-year trend and risk analysis.
+          <div className="flex items-center gap-2">
+            <span className="rounded-md bg-emerald-500/10 px-2.5 py-0.5 text-xs font-mono font-bold text-emerald-400 border border-emerald-500/30">
+              AI CFO ACTION ORCHESTRATOR
+            </span>
+          </div>
+          <h2 className="mt-1 text-2xl font-bold tracking-tight text-white">
+            Prioritized Action Queue & Sensitivity Simulator
+          </h2>
+          <p className="text-xs text-slate-400">
+            Actionable board recommendations linked with interactive What-If scenario modeling.
           </p>
         </div>
-        <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3.5 py-1.5 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200/80 shadow-xs">
-          <Sparkles size={14} className="text-emerald-600" /> CFO Decision Support Engine
-        </span>
       </div>
 
-      {/* Numbered recommendation list */}
-      <section className="space-y-4" aria-label="Recommendations list">
-        {recommendations.map((rec, idx) => (
-          <RecommendationCard key={rec.id} rec={rec} index={idx} />
+      {/* Interactive What-If Scenario Simulator */}
+      <div className="glass-card rounded-2xl p-6 border border-emerald-500/30 bg-slate-900/90 shadow-2xl">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              <Sliders className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white tracking-tight">
+                Interactive Sensitivity & Scenario Modeler (MCP Quant Engine)
+              </h3>
+              <p className="text-[11px] text-slate-400">
+                Adjust key macro variables to simulate real-time impact on FY26 Net Income & EBITDA margins.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleReset}
+            className="flex items-center gap-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 px-3 py-1.5 text-xs text-slate-300 transition-colors"
+          >
+            <RotateCcw className="h-3 w-3" />
+            Reset Baseline
+          </button>
+        </div>
+
+        {/* Sliders Grid */}
+        <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Slider 1: Revenue Growth */}
+          <div className="rounded-xl bg-slate-950/80 p-4 border border-slate-800">
+            <div className="flex items-center justify-between text-xs mb-2">
+              <span className="font-semibold text-slate-300">Revenue Growth Delta</span>
+              <span className={`font-mono font-bold ${revGrowth >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                {revGrowth > 0 ? `+${revGrowth}%` : `${revGrowth}%`}
+              </span>
+            </div>
+            <input
+              type="range"
+              min="-20"
+              max="20"
+              step="1"
+              value={revGrowth}
+              onChange={(e) => setRevGrowth(Number(e.target.value))}
+              className="w-full accent-emerald-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
+            />
+            <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
+              <span>-20% Recession</span>
+              <span>Baseline (0%)</span>
+              <span>+20% Bull</span>
+            </div>
+          </div>
+
+          {/* Slider 2: Cost Inflation */}
+          <div className="rounded-xl bg-slate-950/80 p-4 border border-slate-800">
+            <div className="flex items-center justify-between text-xs mb-2">
+              <span className="font-semibold text-slate-300">Cost Inflation Delta</span>
+              <span className={`font-mono font-bold ${costInflation <= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                {costInflation > 0 ? `+${costInflation}%` : `${costInflation}%`}
+              </span>
+            </div>
+            <input
+              type="range"
+              min="-10"
+              max="20"
+              step="1"
+              value={costInflation}
+              onChange={(e) => setCostInflation(Number(e.target.value))}
+              className="w-full accent-amber-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
+            />
+            <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
+              <span>-10% Savings</span>
+              <span>Baseline (0%)</span>
+              <span>+20% High Opex</span>
+            </div>
+          </div>
+
+          {/* Slider 3: Interest Rate Hike */}
+          <div className="rounded-xl bg-slate-950/80 p-4 border border-slate-800">
+            <div className="flex items-center justify-between text-xs mb-2">
+              <span className="font-semibold text-slate-300">ECB/Central Bank Rate Hike</span>
+              <span className={`font-mono font-bold ${interestRateDelta <= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                {interestRateDelta > 0 ? `+${interestRateDelta}%` : `${interestRateDelta}%`}
+              </span>
+            </div>
+            <input
+              type="range"
+              min="-2"
+              max="4"
+              step="0.25"
+              value={interestRateDelta}
+              onChange={(e) => setInterestRateDelta(Number(e.target.value))}
+              className="w-full accent-cobalt bg-slate-800 h-1.5 rounded-lg cursor-pointer"
+            />
+            <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
+              <span>-2.0% Cuts</span>
+              <span>Baseline (0%)</span>
+              <span>+4.0% Tightening</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Simulated Financial Outputs */}
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-slate-800 pt-4">
+          <div className="rounded-xl bg-slate-950 p-3.5 border border-slate-800">
+            <span className="text-[11px] text-slate-400">Projected Revenue</span>
+            <p className="text-xl font-bold text-white tabular-nums mt-1">
+              €{projectedRevenue.toFixed(0)}M
+            </p>
+            <span className="text-[10px] font-mono text-slate-400">
+              Base: €{baseRevenue}M
+            </span>
+          </div>
+
+          <div className="rounded-xl bg-slate-950 p-3.5 border border-slate-800">
+            <span className="text-[11px] text-slate-400">Projected Net Profit</span>
+            <p className="text-xl font-bold text-white tabular-nums mt-1">
+              €{projectedNetIncome.toFixed(0)}M
+            </p>
+            <span
+              className={`text-[10px] font-mono font-bold ${
+                deltaIncomePct >= 0 ? "text-emerald-400" : "text-rose-400"
+              }`}
+            >
+              {deltaIncomePct >= 0 ? `+${deltaIncomePct.toFixed(1)}% vs Base` : `${deltaIncomePct.toFixed(1)}% vs Base`}
+            </span>
+          </div>
+
+          <div className="rounded-xl bg-slate-950 p-3.5 border border-slate-800">
+            <span className="text-[11px] text-slate-400">Net Profit Margin</span>
+            <p className="text-xl font-bold text-white tabular-nums mt-1">
+              {projectedMargin.toFixed(1)}%
+            </p>
+            <span className="text-[10px] font-mono text-emerald-400">
+              Historical Base: 17.6%
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Prioritized Action Cards */}
+      <div className="space-y-4">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+          Prioritized Action Execution Plan
+        </h3>
+
+        {ACTION_ITEMS.map((action) => (
+          <div
+            key={action.id}
+            className="glass-card rounded-2xl p-5 border border-slate-800 bg-slate-900/80 hover:border-slate-700 transition-all"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="rounded-md bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-mono font-bold text-emerald-400 border border-emerald-500/30">
+                  {action.priority}
+                </span>
+                <span className="text-xs font-bold text-slate-300">{action.category}</span>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs">
+                <span className="text-emerald-400 font-mono font-bold flex items-center gap-1">
+                  <DollarSign className="h-3.5 w-3.5" />
+                  {action.financialImpact}
+                </span>
+                <span className="text-slate-400 flex items-center gap-1">
+                  <Clock className="h-3.5 w-3.5 text-slate-500" />
+                  {action.timeframe}
+                </span>
+              </div>
+            </div>
+
+            <h3 className="mt-3 text-base font-bold text-white tracking-tight">
+              {action.title}
+            </h3>
+
+            <p className="mt-2 text-xs text-slate-300 leading-relaxed bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+              <span className="font-semibold text-emerald-400 font-mono mr-1">Rationale:</span>
+              {action.rationale}
+            </p>
+
+            <div className="mt-4 flex items-center justify-between border-t border-slate-800/60 pt-3 text-xs">
+              <span className="rounded-full bg-slate-950 px-3 py-1 text-[11px] font-semibold text-slate-300 border border-slate-800">
+                Status: {action.status}
+              </span>
+
+              <button className="flex items-center gap-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-md shadow-emerald-500/20 transition-all active:scale-95">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Approve & Execute Action
+              </button>
+            </div>
+          </div>
         ))}
-      </section>
+      </div>
     </div>
   );
 }

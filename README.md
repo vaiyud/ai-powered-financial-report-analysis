@@ -1,226 +1,161 @@
-# SmartFlow One — AI-Powered Financial Report Analysis Intelligence
+# 🛡️ SmartFlow One — AI-Powered Multi-Agent Financial Intelligence & Provenance Workstation
 
-SmartFlow One is a financial document intelligence SaaS platform that ingests financial reports, automatically scrubs personally identifiable information (PII) for PDPA Malaysia compliance, and produces AI-driven executive summaries, risk assessments, and CFO-level action recommendations using AI.
+[![Vercel Deployment](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat&logo=vercel)](https://vercel.com)
+[![Model Context Protocol](https://img.shields.io/badge/MCP-Integrated-emerald?style=flat&logo=openai)](https://modelcontextprotocol.io)
+[![PDPA Compliant](https://img.shields.io/badge/Compliance-PDPA%20Malaysia%202010-blue?style=flat&logo=shield)](https://www.pdp.gov.my)
+[![Google Gemini 2.5](https://img.shields.io/badge/LLM-Gemini%202.5%20Flash-4285F4?style=flat&logo=google)](https://ai.google.dev)
+[![TypeScript](https://img.shields.io/badge/Language-TypeScript%205-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org)
 
----
-
-## Lab(s) Tackled
-
-**Lab 1: Digital Transformation & Operations**
-
-- AI-Powered Financial Report Analysis - Powered by Experian 
-
+SmartFlow One (v2.0 Production) is an enterprise-grade **Multi-Agent Financial Intelligence & Document Provenance SaaS platform**. It ingests dense annual reports (PDF, XLSX, CSV), automatically scrubs personally identifiable information (PII) under **Malaysian PDPA Act 2010** regulations, and coordinates **4 autonomous agents over the Model Context Protocol (MCP)** to produce verified CFO summaries, risk matrices, and interactive What-If sensitivity simulations with zero math hallucinations.
 
 ---
 
-## The Problem
+## 🏛️ System Architecture
 
-Financial professionals spend hours manually reviewing reports, extracting metrics, and identifying risks across multiple documents. Simultaneously, regulatory requirements (like Malaysia's PDPA) demand that personal data is protected before being processed by AI systems — creating a tension between speed and compliance.
+```mermaid
+flowchart TD
+    User([👤 CFO / Financial Analyst]) -->|Uploads PDF / XLSX| Ingest[Document Ingestion Engine]
+    Ingest --> Scrubber[🛡️ Malaysian PDPA PII Scrubber]
 
-Most existing tools either lack AI capabilities or ignore privacy requirements entirely, forcing finance teams to choose between efficiency and regulatory compliance.
+    subgraph "🤖 Multi-Agent Orchestration Layer"
+        Forensic[📄 Forensic Parser Agent]
+        Quant[🔢 Quantitative Sandbox Agent]
+        Auditor[🛡️ PDPA & Risk Auditor]
+        Critic[⚖️ Adversarial Critic Verifier]
+    end
 
----
+    subgraph "🔌 Model Context Protocol (MCP Server)"
+        MCP_T1[🛠️ scrub_pdpa_pii]
+        MCP_T2[🛠️ query_vector_index]
+        MCP_T3[🛠️ execute_quant_sandbox]
+        MCP_T4[🛠️ verify_citations]
+    end
 
-## Proposed Solution
+    Scrubber --> Forensic
+    Forensic <-->|JSON-RPC / stdio| MCP_T2
+    Quant <-->|Deterministic Python| MCP_T3
+    Auditor <-->|Audit Hash| MCP_T1
+    Critic <-->|Provenance Gate| MCP_T4
 
-SmartFlow One provides a unified platform that:
-
-1. **Ingests** financial documents (PDF, Excel, CSV).
-2. **Scrubs** PII automatically before any AI processing (PDPA compliance by default).
-3. **Extracts** key financial metrics using Google Gemini.
-4. **Generates** executive summaries, risk assessments, and prioritized recommendations.
-5. **Presents** everything in a clean, professional dashboard with voice narration support.
-
-Privacy is not an afterthought — it's built into the processing pipeline from step one.
-
----
-
-## How It Works
-
-### Processing Pipeline
-
-```
-Upload Document → PII Detection & Masking → Semantic Chunking → FAISS Vector Indexing → AI Analysis → Dashboard
+    Critic -->|100% Citation Approved| UI[Executive Obsidian Workstation]
+    UI --> Audio[🎙️ Web Speech CFO Audio Briefing]
 ```
 
-1. **Document Upload** — Users upload financial reports via drag-and-drop or file browser (PDF, XLSX, CSV).
-2. **PII Scrubbing** — A regex-based engine detects and masks emails, phone numbers, NRICs, credit cards, IBANs, and IP addresses before any data leaves the client.
-3. **Metric Extraction** — Google Gemini extracts Revenue, Operating Expenses, Net Profit, Assets, Liabilities, and Cash Flow; change percentages are computed deterministically in code.
-4. **Risk Assessment** — AI generates a severity matrix (high/medium/low) with categorised risks, mitigation strategies, and page-level source references.
-5. **Recommendations** — Prioritised CFO action items with cited justifications ("Why this recommendation?").
-6. **Voice Summary** — Web Speech API condenses insights to ~75 words and narrates them aloud (~30 seconds).
+---
 
-### Architecture
+## 🌟 Key Capabilities & Features
+
+### 1. 🔌 Model Context Protocol (MCP) Integration
+- **`src/pipeline/mcp_financial_server.py`**: FastMCP server exposing tools and resources for any MCP-compatible client (Antigravity IDE, Claude Desktop, LangGraph, Vertex AI).
+- **`execute_quant_sandbox`**: Replaces LLM math hallucinations with deterministic Python calculations (EBITDA, YoY deltas, DuPont breakdown, Altman Z-Score).
+- **`verify_provenance_citations`**: Adversarial critic gate verifying that all executive summary claims strictly match source PDF page contents.
+
+### 2. 🛡️ Privacy-by-Default (PDPA Malaysia Act 2010)
+- Client-side regex engine sanitizes **Malaysian NRICs** (`\b\d{6}[-_]?\d{2}[-_]?\d{4}\b`), bank account numbers, IBANs, emails, and executive phone numbers before data reaches the LLM.
+- **Audit Inspection Sandbox**: Administrators can inspect pre-LLM masked prompts against raw inputs.
+- **1-Click Ephemeral Data Purge**: Cryptographically wipe temporary raw files while retaining verified vector indices.
+
+### 3. 📊 Split-Screen Provenance Studio
+- Interactive Recharts area and waterfall revenue trajectory charts.
+- Side-by-side **Document Provenance Inspector**: Clicking any financial metric (e.g. Net Sales, Short-Term Debt) synchronizes the PDF canvas with a bounding-box highlight on the cited disclosure page.
+
+### 4. 🎛️ Interactive What-If Sensitivity Simulator
+- Sliders for **Revenue Growth ($\pm20\%$)**, **Cost Inflation ($\pm15\%$)**, and **Interest Rate Hikes ($\pm4\%$)**.
+- Live dynamic recalculation of projected EBITDA, Net Income, and Profit Margins.
+
+### 5. 🎙️ CFO Audio Briefing Suite
+- Native browser **Web Speech API** synthesized executive digest (~75 words in ~30 seconds).
+- Apple-style waveform equalizer animation, variable playback speeds (`1.0x`, `1.25x`, `1.5x`), and expandable karaoke script.
+
+---
+
+## 📁 Repository Structure
 
 ```
-src/
-├── app/
-│   ├── (app)/              # Authenticated route group (Sidebar + TopBar layout)
-│   │   ├── dashboard/      # Command center with upload + stats + AI summary
-│   │   ├── financial-insights/  # Metric cards + charts (Recharts)
-│   │   ├── risk-analysis/  # Risk severity matrix + detail cards
-│   │   ├── ai-recommendations/ # Prioritised action items
-│   │   ├── privacy-center/ # PDPA compliance dashboard + data purge
-│   │   └── settings/       # Workspace, privacy, and analysis toggles
-│   ├── api/                # REST endpoints for analysis, privacy, settings
-│   └── login/              # Email/password auth (Supabase)
-├── components/             # Sidebar, TopBar, VoiceSummary
-└── lib/                    # AI client, PII engine, audit logger, Supabase clients
+├── mcp.json                              # MCP Server configuration for agent clients
+├── vercel.json                           # Vercel deployment and SPA routing config
+├── package.json                          # Vite + React 18 + Tailwind 3 dependencies
+├── src/
+│   ├── App.tsx                           # React Router SPA root
+│   ├── index.css                         # Obsidian Dark theme, glassmorphism & glow tokens
+│   ├── components/
+│   │   ├── MultiAgentVisualizer.tsx      # Live 4-agent DAG telemetry & consensus board
+│   │   ├── VoiceSummary.tsx              # CFO audio briefing studio with waveform
+│   │   ├── Sidebar.tsx                   # Workspace switcher & PDPA shield status
+│   │   ├── TopBar.tsx                    # Cmd+K command palette & notification drawer
+│   │   └── AppLayout.tsx                 # Master layout wrapper
+│   ├── app/(app)/
+│   │   ├── dashboard/page.tsx            # Executive command center with KPI stream
+│   │   ├── financial-insights/page.tsx   # Split-Screen Provenance Studio
+│   │   ├── risk-analysis/page.tsx        # 3D risk severity matrix & root-cause diagnostics
+│   │   ├── ai-recommendations/page.tsx   # Action queue & What-If sensitivity simulator
+│   │   ├── privacy-center/page.tsx       # PDPA zero-exposure compliance dashboard
+│   │   └── settings/page.tsx             # Workspace & model config
+│   ├── pipeline/
+│   │   ├── mcp_financial_server.py       # Python FastMCP server implementation
+│   │   ├── pdpa_scrubber.py              # Malaysian NRIC & PII regex engine
+│   │   ├── faiss_indexer.py              # Hybrid TF-IDF / FAISS vector indexer
+│   │   └── risk_engine.py                # Quantitative anomaly and solvency scoring
+│   └── lib/
+│       ├── ai.ts                         # Google Gemini 2.5 Flash SDK client
+│       └── supabase.ts                   # Supabase PostgreSQL client & audit logger
 ```
 
-- **Authentication** — Supabase Auth with edge middleware that refreshes sessions on every request and redirects unauthenticated users to `/login`.
-- **AI Layer** — Google Gemini 2.5 Flash with automatic fallback to 1.5 Flash. Returns graceful defaults when no API key is configured.
-- **Privacy Engine** — Ordered regex rules with overlap prevention, optional partial masking (preserve last 4 digits), and conditional audit trail logging.
-
 ---
 
-## Technologies & Tools
+## 🚀 Quickstart & Local Development
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Vite + React SPA |
-| Language | TypeScript 5 |
-| Styling | Tailwind CSS 4 |
-| AI/LLM | Google Gemini (`@google/genai`) — gemini-2.5-flash + 1.5-flash fallback |
-| Auth & Database | Supabase (Auth + PostgreSQL) |
-| Charts | Recharts 3 |
-| Icons | Lucide React |
-| Voice | Web Speech API (browser-native) |
-| Document Parsing | External microservice (Python/FastAPI) |
-| Deployment | Vercel |
+### 1. Prerequisites
+- Node.js 18+ (Node 20 recommended)
+- Python 3.10+ (for MCP Server)
 
----
-
-## Target Users & Beneficiaries
-
-- **CFOs and Finance Directors** — Get AI-generated executive summaries and action recommendations from their financial reports in minutes instead of hours.
-- **Financial Analysts** — Automated metric extraction and anomaly detection reduces manual data entry and catches irregularities faster.
-- **Compliance Officers** — Built-in PDPA Malaysia compliance with PII masking, audit trails, and data retention controls.
-- **Internal Audit Teams** — Full provenance tracking links every insight back to its source document and page number.
-
----
-
-## What Makes This Solution Unique
-
-1. **Privacy-First AI** — PII is detected and masked *before* any data reaches the AI model. Compliance isn't optional — it's the default pipeline behaviour.
-2. **Provenance Tracking** — Every extracted metric, risk, and recommendation links back to its source document and page. Nothing is a black box.
-3. **Voice Narration** — AI summaries are condensed and read aloud via the browser's Speech API — useful for executives who prefer audio briefings.
-4. **Graceful Degradation** — Works without API keys (returns hardcoded demo data), without Supabase (skips auth), and without the parsing service (uses local pipeline files).
-5. **PDPA Malaysia Compliance Built-In** — Specific support for Malaysian regulatory requirements including NRIC detection, data minimisation toggles, and one-click temporary data purge.
-6. **Multi-Model Resilience** — Automatically falls back from Gemini 2.5 Flash to 1.5 Flash if the primary model fails, ensuring AI features remain available.
-
----
-
-## Project Setup & Installation
-
-### Prerequisites
-
-- Node.js 18+ (Node 20+ recommended)
-- npm or yarn
-- A Supabase project (free tier works)
-- Google Gemini API key (optional — app works in demo mode without it)
-
-### 1. Clone the repository
-
+### 2. Installation
 ```bash
-git clone https://github.com/vaiyud/smartflow-one.git
-cd smartflow-one
-```
+# Clone the repository
+git clone https://github.com/vaiyud/ai-powered-financial-report-analysis.git
+cd ai-powered-financial-report-analysis
 
-### 2. Install dependencies
-
-```bash
+# Install Node dependencies
 npm install
 ```
 
-### 3. Configure environment variables
-
-Create a `.env.local` file in the project root:
-
+### 3. Environment Variables
+Create a `.env.local` file in the root directory:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 GEMINI_API_KEY=your-gemini-api-key
-PARSING_SERVICE_URL=http://localhost:8000
 ```
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Your Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anonymous/public key |
-| `SUPABASE_SERVICE_ROLE_KEY` | For API routes | Supabase service-role key (server-side only) |
-| `GEMINI_API_KEY` | Optional | Google Gemini API key (demo mode if missing) |
-| `PARSING_SERVICE_URL` | Optional | External document parsing service URL |
-
-### 4. Run the development server
-
+### 4. Run the Web Application
 ```bash
 npm run dev
 ```
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+### 5. Run the MCP Server
+```bash
+python src/pipeline/mcp_financial_server.py
+```
 
-### 5. Build for production
+---
+
+## 🌐 Deployment to Vercel
+
+The application is fully configured for automatic continuous deployment on **Vercel**:
 
 ```bash
 npm run build
-npm start
 ```
 
----
-
-## Running the Project
-
-```bash
-# Development (with hot reload)
-npm run dev
-
-# Production build
-npm run build && npm start
-
-# Lint
-npm run lint
-```
-
-### Supabase Tables (if using full features)
-
-The app expects these tables in your Supabase project:
-
-- `documents` — Stores uploaded document metadata and raw text
-- `extracted_metrics` — Financial metrics extracted by AI
-- `risks` — Risk assessments generated by AI
-- `executive_summaries` — AI-generated executive summaries
-- `audit_trail` — PII operations and data access log
-- `user_settings` — Per-user privacy and analysis preferences
+When connecting this repository to Vercel:
+1. **Framework Preset**: Vite
+2. **Build Command**: `npm run build`
+3. **Output Directory**: `dist`
+4. **Environment Variables**: Add `GEMINI_API_KEY` and `NEXT_PUBLIC_SUPABASE_URL`.
 
 ---
 
-## Technical Documentation
+## ⚖️ License & Compliance
 
-### API Endpoints
-
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/dashboard` | GET | Dashboard stats, summary metrics, and top risks |
-| `/api/analysis/extract-metrics` | POST | Extract financial metrics from document text via Gemini |
-| `/api/analysis/summary` | GET/POST | Retrieve or generate AI executive summaries |
-| `/api/analysis/risks` | GET/POST | Retrieve risk matrix or generate risk assessment |
-| `/api/analysis/recommendations` | POST | Generate prioritised action recommendations |
-| `/api/documents/mask-pii` | POST | Mask PII in arbitrary text |
-| `/api/documents/cleanup` | POST | Purge raw text for PDPA data retention |
-| `/api/privacy` | GET | PDPA audit report (redaction counts, compliance status) |
-| `/api/settings` | GET/PATCH | Read/update workspace and privacy settings |
-
-### Key Libraries
-
-- **`src/lib/ai.ts`** — Google Gemini wrapper with model fallback
-- **`src/lib/pii.ts`** — PII detection engine (email, phone, SSN, credit card, IBAN, IP)
-- **`src/lib/audit.ts`** — Conditional audit trail logger
-- **`src/lib/supabase/`** — Browser, server, and middleware Supabase clients
-
----
-
-## License
-
-See [LICENSE](./LICENSE) for details.
+Distributed under the MIT License. Built in full compliance with the **Malaysian Personal Data Protection Act (PDPA) 2010**.

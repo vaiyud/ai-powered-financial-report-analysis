@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/mcp.json",
+  "mcpServers": {
+    "smartflow-financial-intelligence": {
+      "command": "python",
+      "args": [
+        "src/pipeline/mcp_financial_server.py"
+      ],
+      "env": {
+        "PYTHONPATH": ".",
+        "GEMINI_API_KEY": "${GEMINI_API_KEY}",
+        "SUPABASE_URL": "${NEXT_PUBLIC_SUPABASE_URL}"
+      }
+    }
+  }
+}
